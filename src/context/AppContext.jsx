@@ -7,6 +7,11 @@ export const AppProvider = ({ children }) => {
   // Can be 'dashboard', 'pacientes', 'agendamentos', 'diario', 'financeiro', 'estudos', 'marketing', 'ferramentas', 'chat', 'suporte'
   const [activePage, setActivePage] = useState('dashboard');
   const [selectedPatientId, setSelectedPatientId] = useState(null); // For viewing patient profiles
+  const [appTheme, setAppTheme] = useState(() => {
+    const saved = localStorage.getItem('webfit_theme');
+    return saved || 'midnight';
+  });
+
 
   // 1. User Profile State
   const [userProfile, setUserProfile] = useState(() => {
@@ -296,6 +301,10 @@ export const AppProvider = ({ children }) => {
 
   // Save states to localStorage when they change
   useEffect(() => {
+    localStorage.setItem('webfit_theme', appTheme);
+  }, [appTheme]);
+
+  useEffect(() => {
     localStorage.setItem('webfit_profile', JSON.stringify(userProfile));
   }, [userProfile]);
 
@@ -530,6 +539,8 @@ export const AppProvider = ({ children }) => {
     <AppContext.Provider value={{
       activePage,
       setActivePage,
+      appTheme,
+      setAppTheme,
       selectedPatientId,
       setSelectedPatientId,
       userProfile,
@@ -568,4 +579,5 @@ export const AppProvider = ({ children }) => {
       {children}
     </AppContext.Provider>
   );
+
 };

@@ -16,8 +16,9 @@ import Modal from './modules/shared/Modal';
 import './styles/global.css';
 
 const InnerApp = () => {
-  const { activePage, setActivePage, userProfile, setUserProfile, setSelectedPatientId } = useContext(AppContext);
+  const { activePage, setActivePage, userProfile, setUserProfile, setSelectedPatientId, appTheme, setAppTheme } = useContext(AppContext);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
   
   // Profile edit form fields
   const [profileName, setProfileName] = useState(userProfile.name);
@@ -53,9 +54,10 @@ const InnerApp = () => {
   };
 
   return (
-    <div className="app-container">
+    <div className={`app-container theme-${appTheme}`}>
       {/* Navbar receives profile trigger */}
       <Navbar onOpenProfile={handleOpenProfileModal} />
+
 
       {/* Main Pages Switchboard */}
       <main>
@@ -110,7 +112,90 @@ const InnerApp = () => {
               required
             />
           </div>
-          <div style={{ padding: '12px', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '13px' }}>
+          
+          <div className="form-group">
+            <label>Tema Visual da Plataforma</label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+              <button 
+                type="button" 
+                onClick={() => setAppTheme('midnight')} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  padding: '8px 12px', 
+                  borderRadius: '6px', 
+                  border: appTheme === 'midnight' ? '2px solid var(--primary-teal)' : '1px solid rgba(255,255,255,0.1)',
+                  backgroundColor: 'var(--bg-dark)', 
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#0b131e', border: '1px solid #ffffff' }}></span>
+                Meia-Noite
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setAppTheme('oled')} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  padding: '8px 12px', 
+                  borderRadius: '6px', 
+                  border: appTheme === 'oled' ? '2px solid var(--primary-teal)' : '1px solid rgba(255,255,255,0.1)',
+                  backgroundColor: '#000000', 
+                  color: '#ffffff',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#000000', border: '1px solid #ffffff' }}></span>
+                OLED Black
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setAppTheme('slate')} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  padding: '8px 12px', 
+                  borderRadius: '6px', 
+                  border: appTheme === 'slate' ? '2px solid var(--primary-teal)' : '1px solid rgba(255,255,255,0.1)',
+                  backgroundColor: '#0f172a', 
+                  color: '#f8fafc',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#0f172a', border: '1px solid #ffffff' }}></span>
+                Cinza Slate
+              </button>
+              <button 
+                type="button" 
+                onClick={() => setAppTheme('light')} 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  padding: '8px 12px', 
+                  borderRadius: '6px', 
+                  border: appTheme === 'light' ? '2px solid var(--primary-teal)' : '1px solid rgba(0,0,0,0.15)',
+                  backgroundColor: '#ffffff', 
+                  color: '#0f172a',
+                  cursor: 'pointer',
+                  textAlign: 'left'
+                }}
+              >
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#f8fafc', border: '1px solid #0f172a' }}></span>
+                Claro Suave
+              </button>
+            </div>
+          </div>
+
+          <div style={{ padding: '12px', backgroundColor: 'var(--primary-teal-light)', borderRadius: '6px', border: '1px solid var(--primary-teal-border)', fontSize: '13px' }}>
             <strong>Plano Atual:</strong> {userProfile.isBlack ? '👑 WebDiet Black' : 'WebDiet Padrão'}
             <div style={{ color: 'var(--text-secondary)', fontSize: '11.5px', marginTop: '4px' }}>
               Para assinar ou gerenciar o plano Black, utilize o banner principal dourado do Dashboard.
@@ -121,6 +206,7 @@ const InnerApp = () => {
           </button>
         </form>
       </Modal>
+
     </div>
   );
 };

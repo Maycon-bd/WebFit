@@ -31,6 +31,10 @@
   --color-danger-bg: rgba(239, 68, 68, 0.1);
   --color-warning: #f59e0b;
   
+  /* Inputs */
+  --input-bg: rgba(0, 0, 0, 0.2);
+  --input-border: rgba(255, 255, 255, 0.1);
+  
   /* Transitions */
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s ease;
@@ -39,3 +43,46 @@
   --navbar-height: 70px;
   --max-width: 1400px;
 }
+
+/* Theme OLED - Preto Absoluto */
+.theme-oled {
+  --bg-dark: #000000;
+  --bg-card: #0a0a0a;
+  --bg-card-hover: #141414;
+  --bg-navbar: #050505;
+  --bg-dropdown: #0f0f0f;
+  --text-primary: #ffffff;
+  --text-secondary: #a3a3a3;
+  --input-bg: rgba(255, 255, 255, 0.03);
+  --input-border: rgba(255, 255, 255, 0.08);
+}
+
+/* Theme Slate - Cinza Moderno */
+.theme-slate {
+  --bg-dark: #0f172a;
+  --bg-card: #1e293b;
+  --bg-card-hover: #334155;
+  --bg-navbar: #0f172a;
+  --bg-dropdown: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --input-bg: rgba(0, 0, 0, 0.15);
+  --input-border: rgba(255, 255, 255, 0.08);
+}
+
+/* Theme Light - Claro Suave */
+.theme-light {
+  --bg-dark: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --bg-navbar: #ffffff;
+  --bg-dropdown: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --primary-teal-light: rgba(13, 161, 156, 0.06);
+  --primary-teal-border: rgba(13, 161, 156, 0.2);
+}
+

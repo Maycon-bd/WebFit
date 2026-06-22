@@ -33,21 +33,7 @@ const Dashboard = ({ onAddPatientClick }) => {
 
   return (
     <div className="main-content">
-      {/* WebDiet Black Banner */}
-      <div 
-        className="gold-banner" 
-        onClick={toggleBlackStatus}
-        style={{ cursor: 'pointer', transition: 'var(--transition-fast)' }}
-        title="Clique para assinar / cancelar o plano WebDiet Black"
-      >
-        <span>👑</span>
-        <span>
-          {userProfile.isBlack 
-            ? 'Você é um membro WebDiet Black! Aproveite o MoveHealth, iMetas e recursos de IA.' 
-            : 'Conheça o Webdiet Black e desbloqueie o MoveHealth, iMetas e mais IA para turbinar seus atendimentos'}
-        </span>
-        <span>👑</span>
-      </div>
+
 
       {/* Main Grid: Patients & Planner */}
       <div className="dashboard-grid">

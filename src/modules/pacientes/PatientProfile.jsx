@@ -1,6 +1,227 @@
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
 
+const MEAL_TEMPLATES = {
+  'Cardápio Semanal': [
+    {
+      name: 'Café da Manhã',
+      time: '08:00',
+      items: [
+        { food: 'Pão integral de fermentação natural', measure: '2 fatias (50g)', subs: ['Tapioca (3 colheres)', 'Cuscuz cozido (4 colheres)'] },
+        { food: 'Ovo de galinha caipira mexido', measure: '2 unidades', subs: ['Queijo minas frescal (2 fatias)', 'Tofu grelhado (80g)'] },
+        { food: 'Café preto sem açúcar', measure: '1 xícara (150ml)', subs: ['Chá de ervas sem açúcar (150ml)'] }
+      ]
+    },
+    {
+      name: 'Almoço',
+      time: '12:30',
+      items: [
+        { food: 'Arroz branco cozido', measure: '100g (4 colheres de sopa)', subs: ['Batata doce cozida (120g)', 'Mandioca cozida (80g)', 'Macarrão integral cozido (90g)'] },
+        { food: 'Feijão carioca cozido', measure: '80g (1 concha média)', subs: ['Lentilha cozida (80g)', 'Grão-de-bico cozido (70g)'] },
+        { food: 'Peito de frango grelhado', measure: '120g (1 filé grande)', subs: ['Patinho moído grelhado (120g)', 'Filé de tilápia grelhado (150g)', 'Ovo mexido (3 unidades)'] },
+        { food: 'Salada de folhas verdes com azeite', measure: 'À vontade', subs: ['Legumes cozidos no vapor (80g)'] }
+      ]
+    },
+    {
+      name: 'Lanche da Tarde',
+      time: '16:00',
+      items: [
+        { food: 'Iogurte natural desnatado', measure: '1 copo (170g)', subs: ['Kefir de leite (150ml)', 'Iogurte de ovelha natural (100g)'] },
+        { food: 'Frutas frescas picadas (Mamão/Morango)', measure: '120g', subs: ['Banana prata (1 unidade)', 'Maçã argentina (1 unidade)'] },
+        { food: 'Castanha-do-pará', measure: '2 unidades (10g)', subs: ['Amêndoas torradas (10 unidades)', 'Nozes chilenas (3 unidades)'] }
+      ]
+    },
+    {
+      name: 'Jantar',
+      time: '20:00',
+      items: [
+        { food: 'Crepioca fit (1 ovo + 1 colher tapioca)', measure: '1 unidade', subs: ['Wrap integral (1 folha Rap10 fit)', 'Omelete com legumes (2 ovos)'] },
+        { food: 'Frango desfiado temperado', measure: '80g', subs: ['Atum ralado em água (1 lata)', 'Queijo cottage light (3 colheres de sopa)'] }
+      ]
+    }
+  ],
+  'Plano de Emagrecimento Definição': [
+    {
+      name: 'Café da Manhã',
+      time: '07:30',
+      items: [
+        { food: 'Ovos cozidos inteiros', measure: '2 unidades', subs: ['Claras de ovos (4 claras)', 'Whey protein concentrado (1 scoop)'] },
+        { food: 'Mamão formosa picado', measure: '150g', subs: ['Morango fresco (200g)', 'Melão picado (200g)'] }
+      ]
+    },
+    {
+      name: 'Almoço',
+      time: '12:00',
+      items: [
+        { food: 'Arroz integral cozido', measure: '80g', subs: ['Batata inglesa cozida (100g)', 'Purê de abóbora (150g)'] },
+        { food: 'Filé de tilápia grelhado', measure: '150g', subs: ['Peito de frango (130g)', 'Filé mignon suíno grelhado (120g)'] },
+        { food: 'Brócolis e couve-flor no vapor', measure: '100g', subs: ['Aspargos grelhados (80g)', 'Salada verde à vontade'] }
+      ]
+    },
+    {
+      name: 'Lanche da Tarde',
+      time: '15:30',
+      items: [
+        { food: 'Whey protein isolado', measure: '1 scoop (30g)', subs: ['Iogurte grego zero gordura (150g)'] },
+        { food: 'Farelo de aveia', measure: '20g', subs: ['Sementes de chia (15g)', 'Sementes de linhaça (15g)'] }
+      ]
+    },
+    {
+      name: 'Jantar',
+      time: '19:30',
+      items: [
+        { food: 'Patinho bovino grelhado', measure: '120g', subs: ['Peito de frango grelhado (130g)', 'Atum sólido em água (120g)'] },
+        { food: 'Mix de folhas verdes com limão', measure: 'À vontade', subs: ['Legumes grelhados (100g)'] }
+      ]
+    }
+  ],
+  'Protocolo Hipertrofia Limpa': [
+    {
+      name: 'Café da Manhã',
+      time: '07:30',
+      items: [
+        { food: 'Tapioca com ovos mexidos', measure: '3 colheres goma + 3 ovos', subs: ['Pão de forma integral (3 fatias) + Omelete (3 ovos)', 'Cuscuz com queijo coalho (100g) + 3 ovos'] },
+        { food: 'Banana prata com mel', measure: '1 unidade + 1 colher sopa', subs: ['Uvas passas (30g)', 'Suco de uva integral (200ml)'] }
+      ]
+    },
+    {
+      name: 'Almoço',
+      time: '12:30',
+      items: [
+        { food: 'Arroz branco cozido', measure: '150g', subs: ['Macarrão sêmola cozido (140g)', 'Purê de batata inglesa (200g)'] },
+        { food: 'Feijão preto cozido', measure: '100g', subs: ['Lentilha cozida (100g)', 'Grão-de-bico cozido (90g)'] },
+        { food: 'Patinho grelhado', measure: '150g', subs: ['Sobrecoxa de frango grelhada (150g)', 'Alcatra grelhada (150g)'] },
+        { food: 'Suco de laranja natural', measure: '1 copo (200ml)', subs: ['Salada de frutas com aveia (100g)'] }
+      ]
+    },
+    {
+      name: 'Lanche da Tarde (Pré-Treino)',
+      time: '16:00',
+      items: [
+        { food: 'Batata doce cozida', measure: '150g', subs: ['Mandioca cozida (110g)', 'Pão francês com geleia (1 unidade)'] },
+        { food: 'Peito de frango desfiado', measure: '100g', subs: ['Atum ralado (1 lata)', 'Claras de ovos cozidas (5 unidades)'] }
+      ]
+    },
+    {
+      name: 'Pós-Treino Imediato',
+      time: '18:00',
+      items: [
+        { food: 'Whey protein concentrado', measure: '1.5 scoops (45g)', subs: ['Beef protein (45g)', 'Claras de ovos desidratadas (40g)'] },
+        { food: 'Dextrose ou Maltodextrina', measure: '30g', subs: ['Banana madura amassada (2 unidades)', 'Mel de abelha (2 colheres de sopa)'] }
+      ]
+    },
+    {
+      name: 'Jantar',
+      time: '20:30',
+      items: [
+        { food: 'Arroz branco cozido', measure: '150g', subs: ['Batata doce cozida (180g)', 'Macarrão cozido (140g)'] },
+        { food: 'Sobrecoxa de frango assada', measure: '150g', subs: ['Filé de salmão grelhado (150g)', 'Carne de porco magra (140g)'] },
+        { food: 'Legumes no vapor (cenoura/abobrinha)', measure: '100g', subs: ['Brócolis refogado (100g)'] }
+      ]
+    }
+  ],
+  'Cardápio Low Carb Ajustado': [
+    {
+      name: 'Café da Manhã',
+      time: '08:00',
+      items: [
+        { food: 'Omelete de queijo e tomate', measure: '3 ovos + 30g queijo', subs: ['Ovos mexidos com manteiga (3 ovos)', 'Abacate com ovos cozidos'] },
+        { food: 'Café preto com óleo de coco', measure: '1 xícara + 1 colher chá', subs: ['Chá verde gelado sem açúcar (200ml)'] }
+      ]
+    },
+    {
+      name: 'Almoço',
+      time: '12:30',
+      items: [
+        { food: 'Sobrecoxa de frango assada com pele', measure: '160g', subs: ['Filé de salmão grelhado (160g)', 'Costela suína assada (150g)'] },
+        { food: 'Salada de folhas verdes (rúcula, alface)', measure: 'À vontade', subs: ['Espinafre refogado no alho (100g)'] },
+        { food: 'Abobrinha e berinjela grelhadas no azeite', measure: '120g', subs: ['Brócolis gratinado com queijo (100g)'] }
+      ]
+    },
+    {
+      name: 'Lanche da Tarde',
+      time: '16:30',
+      items: [
+        { food: 'Mix de oleaginosas (nozes, macadâmias)', measure: '35g', subs: ['Queijo provolone desidratado (30g)', 'Abacate picado com limão (100g)'] }
+      ]
+    },
+    {
+      name: 'Jantar',
+      time: '20:00',
+      items: [
+        { food: 'Sopa cremosa de abóbora com carne moída', measure: '1 prato fundo (300ml)', subs: ['Omelete de espinafre com bacon (3 ovos)', 'Filé de tilápia com legumes no vapor (150g)'] }
+      ]
+    }
+  ],
+  'Planejamento Gestacional Fit': [
+    {
+      name: 'Café da Manhã',
+      time: '08:00',
+      items: [
+        { food: 'Iogurte natural integral com chia', measure: '170g + 1 colher sopa', subs: ['Leite integral morno com cacau (200ml)'] },
+        { food: 'Pão de aveia com ovos mexidos', measure: '1 fatia + 2 ovos', subs: ['Tapioca com queijo cottage e gergelim (1 unidade)'] },
+        { food: 'Mamão picado', measure: '100g', subs: ['Kiwi (2 unidades)', 'Laranja com bagaço (1 unidade)'] }
+      ]
+    },
+    {
+      name: 'Colação',
+      time: '10:30',
+      items: [
+        { food: 'Castanha-do-pará (fonte de selênio)', measure: '2 unidades', subs: ['Amêndoas (10 unidades)'] }
+      ]
+    },
+    {
+      name: 'Almoço',
+      time: '12:30',
+      items: [
+        { food: 'Arroz integral cozido', measure: '100g', subs: ['Quinoa cozida (100g)', 'Batata doce cozida (120g)'] },
+        { food: 'Feijão preto cozido (rico em ferro)', measure: '80g', subs: ['Lentilha cozida (80g)', 'Ervilha cozida (80g)'] },
+        { food: 'Filé de frango grelhado', measure: '120g', subs: ['Filé de peixe cozido (130g)', 'Carne bovina magra grelhada (100g)'] },
+        { food: 'Salada de couve refogada (ácido fólico)', measure: '100g', subs: ['Brócolis cozido (100g)'] }
+      ]
+    },
+    {
+      name: 'Lanche da Tarde',
+      time: '16:00',
+      items: [
+        { food: 'Banana prata com aveia e canela', measure: '1 unidade + 1 colher sopa', subs: ['Maçã assada com canela + castanhas'] },
+        { food: 'Queijo minas frescal pasteurizado', measure: '2 fatias (50g)', subs: ['Iogurte natural (170g)'] }
+      ]
+    },
+    {
+      name: 'Jantar',
+      time: '19:30',
+      items: [
+        { food: 'Sopa de legumes com carne e macarrão', measure: '1 prato fundo (350ml)', subs: ['Crepioca com queijo e tomate (1 unidade) + Suco de uva', 'Arroz com frango desfiado e cenoura ralada'] }
+      ]
+    }
+  ]
+};
+
+const CLINICAL_EXAMS = {
+  '1': [
+    { name: 'Hemoglobina Glicada (HbA1c)', value: 5.4, status: 'Normal', note: 'Excelente controle glicêmico.' },
+    { name: 'Colesterol HDL', value: 48, status: 'Atenção', note: 'Levemente baixo para o sexo feminino (Referência > 50 mg/dL). Recomenda-se incentivar gorduras boas (azeite, abacate).' },
+    { name: 'Ferro Sérico', value: 42, status: 'Atenção', note: 'Abaixo do recomendado para mulheres (Referência 50-170 mcg/dL). Atenção especial pós-bariátrica.' },
+    { name: 'Vitamina B12', value: 180, status: 'Alerta', note: 'Deficiência detectada (Referência 200-900 pg/mL). Necessária suplementação devido à bariátrica.' },
+    { name: 'Glicose em Jejum', value: 88, status: 'Normal', note: 'Glicemia de jejum adequada.' }
+  ],
+  '5': [
+    { name: 'Hemoglobina Glicada (HbA1c)', value: 5.9, status: 'Atenção', note: 'Pré-diabetes detectada (Referência 5.7% - 6.4%). Foco em dieta de baixo índice glicêmico e atividades físicas.' },
+    { name: 'Colesterol HDL', value: 45, status: 'Normal', note: 'Adequado para o sexo masculino (Referência > 40 mg/dL).' },
+    { name: 'Ferro Sérico', value: 95, status: 'Normal', note: 'Dentro da normalidade.' },
+    { name: 'Vitamina B12', value: 410, status: 'Normal', note: 'Adequado.' },
+    { name: 'Glicose em Jejum', value: 104, status: 'Atenção', note: 'Levemente elevada (Referência < 100 mg/dL). Foco em restrição de carboidratos refinados.' }
+  ],
+  'default': [
+    { name: 'Hemoglobina Glicada (HbA1c)', value: 5.2, status: 'Normal', note: 'Normal.' },
+    { name: 'Colesterol HDL', value: 55, status: 'Normal', note: 'Normal.' },
+    { name: 'Ferro Sérico', value: 80, status: 'Normal', note: 'Normal.' },
+    { name: 'Vitamina B12', value: 350, status: 'Normal', note: 'Normal.' },
+    { name: 'Glicose em Jejum', value: 90, status: 'Normal', note: 'Normal.' }
+  ]
+};
+
 const PatientProfile = ({ patient, onEdit, onBack }) => {
   const { 
     userProfile, 
@@ -116,13 +337,33 @@ const PatientProfile = ({ patient, onEdit, onBack }) => {
           </div>
           <div className="profile-name-area">
             <h1>{patient.name}</h1>
-            <div className="tag-list">
+            <div className="tag-list" style={{ alignItems: 'center' }}>
               {patient.tags && patient.tags.map((tag, idx) => (
                 <span key={idx} className="tag-badge">{tag}</span>
               ))}
               <span className={`tag-badge`} style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)' }}>
                 Status: {patient.status}
               </span>
+              <button 
+                onClick={() => setActiveTab('exames')} 
+                style={{ 
+                  background: 'var(--primary-teal-light)', 
+                  color: 'var(--text-teal)', 
+                  border: '1px solid var(--primary-teal-border)', 
+                  padding: '3px 10px', 
+                  borderRadius: '12px', 
+                  fontSize: '11px', 
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  transition: 'var(--transition-fast)'
+                }}
+                className="btn-exame-atalho"
+              >
+                Atalhos: 🩺 Entrar na Análise
+              </button>
             </div>
           </div>
         </div>
@@ -187,6 +428,7 @@ const PatientProfile = ({ patient, onEdit, onBack }) => {
           <div className="tabs-menu">
             <button className={`tab-btn ${activeTab === 'anamnese' ? 'active' : ''}`} onClick={() => setActiveTab('anamnese')}>Anamnese</button>
             <button className={`tab-btn ${activeTab === 'prescrever' ? 'active' : ''}`} onClick={() => setActiveTab('prescrever')}>Cardápio</button>
+            <button className={`tab-btn ${activeTab === 'exames' ? 'active' : ''}`} onClick={() => setActiveTab('exames')}>Exames</button>
             <button className={`tab-btn ${activeTab === 'preconsulta' ? 'active' : ''}`} onClick={() => setActiveTab('preconsulta')}>Pré-consulta</button>
             <button className={`tab-btn ${activeTab === 'metas' ? 'active' : ''}`} onClick={() => setActiveTab('metas')}>iMetas</button>
             <button className={`tab-btn ${activeTab === 'diario' ? 'active' : ''}`} onClick={() => setActiveTab('diario')}>Diário Alimentar</button>
@@ -206,11 +448,11 @@ const PatientProfile = ({ patient, onEdit, onBack }) => {
               </div>
             )}
 
-            {/* PRESCREVER */}
+            {/* CARDÁPIO */}
             {activeTab === 'prescrever' && (
               <div>
                 <h3 style={{ marginBottom: '16px' }}>Prescrever Plano Alimentar / Cardápio</h3>
-                <form onSubmit={handleEmitPrescription} style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '400px' }}>
+                <form onSubmit={handleEmitPrescription} style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '400px', marginBottom: '24px' }}>
                   <div className="form-group">
                     <label>Tipo de Prescrição</label>
                     <select 
@@ -233,6 +475,122 @@ const PatientProfile = ({ patient, onEdit, onBack }) => {
                     Emitir Cardápio
                   </button>
                 </form>
+
+                {/* VISUALIZAÇÃO DO CARDÁPIO ATUAL COM SUBSTITUIÇÕES EM LINHA */}
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <h3 style={{ margin: 0, fontSize: '16px' }}>Visualização do Cardápio Ativo</h3>
+                    <span style={{ fontSize: '12px', color: 'var(--accent-gold)', fontWeight: '600' }}>
+                      📋 {prescriptionType}
+                    </span>
+                  </div>
+                  
+                  {(MEAL_TEMPLATES[prescriptionType] || MEAL_TEMPLATES['Cardápio Semanal']).map((meal, mealIdx) => (
+                    <div key={mealIdx} className="meal-section">
+                      <div className="meal-header">
+                        <span className="meal-title">
+                          🍴 {meal.name}
+                        </span>
+                        <span className="meal-time">🕒 {meal.time}</span>
+                      </div>
+                      
+                      <div className="meal-items-list">
+                        {meal.items.map((item, itemIdx) => (
+                          <div key={itemIdx} className="meal-item-row">
+                            <div className="meal-food-info">
+                              <span className="food-name">{item.food}</span>
+                              <span className="food-measure">[{item.measure}]</span>
+                            </div>
+                            <div className="meal-arrow">➔</div>
+                            <div className="meal-subs-tags">
+                              {item.subs.map((sub, subIdx) => (
+                                <span key={subIdx} className="meal-sub-badge">{sub}</span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* EXAMES BIOQUÍMICOS */}
+            {activeTab === 'exames' && (
+              <div>
+                <h3 style={{ marginBottom: '12px' }}>Análise de Exames Bioquímicos</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '20px' }}>
+                  Acompanhamento clínico com valores de referência ajustados dinamicamente para o sexo: <strong>{patient.gender}</strong>.
+                </p>
+
+                <div className="exams-table-container">
+                  <table className="exams-table">
+                    <thead>
+                      <tr>
+                        <th>Parâmetro</th>
+                        <th>Resultado</th>
+                        <th>Status</th>
+                        <th>Faixa de Referência ({patient.gender === 'Masculino' ? 'Masculino' : 'Feminino'})</th>
+                        <th>Observação / Conduta</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(CLINICAL_EXAMS[patient.id] || CLINICAL_EXAMS['default']).map((exam, idx) => {
+                        let refRange = '';
+                        let badgeClass = 'status-normal';
+                        
+                        if (exam.name.includes('Colesterol HDL')) {
+                          refRange = patient.gender === 'Masculino' ? '> 40 mg/dL' : '> 50 mg/dL';
+                          badgeClass = exam.value < (patient.gender === 'Masculino' ? 40 : 50) ? 'status-attention' : 'status-normal';
+                        } else if (exam.name.includes('Ferro Sérico')) {
+                          refRange = patient.gender === 'Masculino' ? '65 - 175 mcg/dL' : '50 - 170 mcg/dL';
+                          const minVal = patient.gender === 'Masculino' ? 65 : 50;
+                          const maxVal = patient.gender === 'Masculino' ? 175 : 170;
+                          badgeClass = (exam.value < minVal || exam.value > maxVal) ? 'status-attention' : 'status-normal';
+                        } else if (exam.name.includes('Hemoglobina Glicada')) {
+                          refRange = '< 5.7% (Normal) | 5.7%-6.4% (Atenção) | >= 6.5% (Diabetes)';
+                          if (exam.value >= 6.5) {
+                            badgeClass = 'status-danger';
+                          } else if (exam.value >= 5.7) {
+                            badgeClass = 'status-attention';
+                          } else {
+                            badgeClass = 'status-normal';
+                          }
+                        } else if (exam.name.includes('Vitamina B12')) {
+                          refRange = '200 - 900 pg/mL';
+                          badgeClass = exam.value < 200 ? 'status-danger' : exam.value < 300 ? 'status-attention' : 'status-normal';
+                        } else if (exam.name.includes('Glicose')) {
+                          refRange = '70 - 99 mg/dL';
+                          badgeClass = (exam.value < 70 || exam.value >= 100) ? 'status-attention' : 'status-normal';
+                        }
+
+                        // Use custom status from JSON if defined as Alerta/Deficiência
+                        if (exam.status === 'Alerta') {
+                          badgeClass = 'status-danger';
+                        }
+
+                        return (
+                          <tr key={idx}>
+                            <td><strong>{exam.name}</strong></td>
+                            <td>{exam.value} {exam.name.includes('Hemoglobina') ? '%' : exam.name.includes('Vitamina') ? 'pg/mL' : exam.name.includes('Glicose') || exam.name.includes('Colesterol') ? 'mg/dL' : 'mcg/dL'}</td>
+                            <td>
+                              <span className={`exam-status-badge ${badgeClass}`}>
+                                {badgeClass === 'status-normal' ? 'Normal' : badgeClass === 'status-attention' ? 'Atenção' : 'Alerta'}
+                              </span>
+                            </td>
+                            <td style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>{refRange}</td>
+                            <td style={{ fontSize: '12.5px', color: 'var(--text-secondary)' }}>{exam.note}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="exam-reference-box">
+                  <strong>💡 Informação de Referência Clínica:</strong> Os exames alterados acionam lembretes na conduta do prontuário para que o profissional recomende alimentos ricos nas frações deficientes (ex: couve/feijão para ferro baixo, salmão/chia para HDL baixo, suplementação sublingual ou aumento de carne para B12 sob baixa absorção).
+                </div>
               </div>
             )}
 
