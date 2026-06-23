@@ -12,6 +12,12 @@ export const AppProvider = ({ children }) => {
     return saved || 'midnight';
   });
 
+  // Action Triggers from Apps Grid dropdown
+  const [triggerPatientCreate, setTriggerPatientCreate] = useState(false);
+  const [triggerAppointmentCreate, setTriggerAppointmentCreate] = useState(false);
+  const [triggerFinancialsCreate, setTriggerFinancialsCreate] = useState(false);
+
+
 
   // 1. User Profile State
   const [userProfile, setUserProfile] = useState(() => {
@@ -541,7 +547,14 @@ export const AppProvider = ({ children }) => {
       setActivePage,
       appTheme,
       setAppTheme,
+      triggerPatientCreate,
+      setTriggerPatientCreate,
+      triggerAppointmentCreate,
+      setTriggerAppointmentCreate,
+      triggerFinancialsCreate,
+      setTriggerFinancialsCreate,
       selectedPatientId,
+
       setSelectedPatientId,
       userProfile,
       setUserProfile,

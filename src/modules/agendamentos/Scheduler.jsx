@@ -2,12 +2,29 @@ import React, { useState, useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
 
 const Scheduler = () => {
-  const { appointments, addAppointment, cancelAppointment, patients } = useContext(AppContext);
+  const { 
+    appointments, 
+    addAppointment, 
+    cancelAppointment, 
+    patients,
+    triggerAppointmentCreate,
+    setTriggerAppointmentCreate
+  } = useContext(AppContext);
+  
   const [selectedPatientId, setSelectedPatientId] = useState(patients[0]?.id || '');
   const [date, setDate] = useState('2026-06-19');
   const [time, setTime] = useState('09:00');
   const [type, setType] = useState('Presencial');
   const [isAdding, setIsAdding] = useState(false);
+
+  // Sync state for quick action 'novo agendamento'
+  React.useEffect(() => {
+    if (triggerAppointmentCreate) {
+      setIsAdding(true);
+      setTriggerAppointmentCreate(false);
+    }
+  }, [triggerAppointmentCreate]);
+
 
   const handleSubmit = (e) => {
     e.preventDefault();

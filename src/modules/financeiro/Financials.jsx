@@ -2,12 +2,28 @@ import React, { useState, useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
 
 const Financials = () => {
-  const { financials, addTransaction, patients } = useContext(AppContext);
+  const { 
+    financials, 
+    addTransaction, 
+    patients,
+    triggerFinancialsCreate,
+    setTriggerFinancialsCreate
+  } = useContext(AppContext);
+  
   const [selectedPatientId, setSelectedPatientId] = useState(patients[0]?.id || '');
   const [customClientName, setCustomClientName] = useState('');
   const [value, setValue] = useState('250.00');
   const [method, setMethod] = useState('PIX');
   const [isAdding, setIsAdding] = useState(false);
+
+  // Sync state for quick action 'novo registro financeiro'
+  React.useEffect(() => {
+    if (triggerFinancialsCreate) {
+      setIsAdding(true);
+      setTriggerFinancialsCreate(false);
+    }
+  }, [triggerFinancialsCreate]);
+
 
   const handleSubmit = (e) => {
     e.preventDefault();

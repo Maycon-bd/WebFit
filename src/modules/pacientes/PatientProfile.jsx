@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
+import Modal from '../shared/Modal';
 
 const MEAL_TEMPLATES = {
   'Cardápio Semanal': [
@@ -235,8 +236,22 @@ const PatientProfile = ({ patient, onEdit, onBack }) => {
     addTransaction
   } = useContext(AppContext);
 
-  const [activeTab, setActiveTab] = useState('anamnese'); // 'anamnese', 'prescrever', 'preconsulta', 'metas', 'diario', 'impressos', 'retorno'
+  const [activeTab, setActiveTab] = useState('perfil'); // 'perfil', 'anamnese', 'prescrever', 'exames', 'preconsulta', 'metas', 'diario', 'impressos', 'retorno'
   
+  // Toggles for patient access
+  const [linkAccess, setLinkAccess] = useState(true);
+  const [appAccess, setAppAccess] = useState(true);
+  const [plusAccess, setPlusAccess] = useState(true);
+
+  // Anthropometria states
+  const [showAntropometriaModal, setShowAntropometriaModal] = useState(false);
+  const [weight, setWeight] = useState('');
+  const [height, setHeight] = useState('');
+  const [bfPercentage, setBfPercentage] = useState('');
+  const [antropometriaHistory, setAntropometriaHistory] = useState([
+    { id: '1', date: '22/06/2026', weight: '72.5', height: '1.68', bf: '24.2', bmi: '25.7' }
+  ]);
+
   // Tab states
   const [prescriptionType, setPrescriptionType] = useState('Cardápio Semanal');
   const [selectedTemplate, setSelectedTemplate] = useState('mt1');
@@ -426,7 +441,8 @@ const PatientProfile = ({ patient, onEdit, onBack }) => {
         <div className="profile-content-area">
           {/* Tabs header */}
           <div className="tabs-menu">
-            <button className={`tab-btn ${activeTab === 'anamnese' ? 'active' : ''}`} onClick={() => setActiveTab('anamnese')}>Anamnese</button>
+            <button className={`tab-btn ${activeTab === 'perfil' ? 'active' : ''}`} onClick={() => setActiveTab('perfil')}>Perfil do Paciente</button>
+            <button className={`tab-btn ${activeTab === 'anamnese' ? 'active' : ''}`} onClick={() => setActiveTab('anamnese')}>Anamnese Geral</button>
             <button className={`tab-btn ${activeTab === 'prescrever' ? 'active' : ''}`} onClick={() => setActiveTab('prescrever')}>Cardápio</button>
             <button className={`tab-btn ${activeTab === 'exames' ? 'active' : ''}`} onClick={() => setActiveTab('exames')}>Exames</button>
             <button className={`tab-btn ${activeTab === 'preconsulta' ? 'active' : ''}`} onClick={() => setActiveTab('preconsulta')}>Pré-consulta</button>
@@ -438,6 +454,237 @@ const PatientProfile = ({ patient, onEdit, onBack }) => {
 
           {/* Tab contents */}
           <div className="tab-content">
+            {/* PERFIL DO PACIENTE */}
+            {activeTab === 'perfil' && (
+              <div className="perfil-tab-container">
+                {/* 1. Dados básicos */}
+                <div className="perfil-section-card">
+                  <div className="perfil-card-header">
+                    <h3>Dados básicos</h3>
+                    <button className="perfil-edit-btn" onClick={() => onEdit(patient)}>Editar</button>
+                  </div>
+                  <div className="basic-data-grid">
+                    <div className="basic-data-avatar-container">
+                      <div className="avatar-wrapper">
+                        <img 
+                          src={patient.gender === 'Masculino' 
+                            ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80' 
+                            : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80'
+                          } 
+                          alt="Avatar do Paciente" 
+                        />
+                      </div>
+                    </div>
+                    <div className="basic-data-info-grid">
+                      <div className="info-field-box">
+                        <label>Nome completo</label>
+                        <div className="info-field-value">{patient.name}</div>
+                      </div>
+                      <div className="info-fields-row">
+                        <div className="info-field-box">
+                          <label>Data de nascimento</label>
+                          <div className="info-field-value">{patient.birthDate ? patient.birthDate.split('-').reverse().join('/') : 'Não informada'}</div>
+                        </div>
+                        <div className="info-field-box">
+                          <label>Telefone com DDD</label>
+                          <div className="info-field-value" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span>{patient.phone || 'Não informado'}</span>
+                            {patient.phone && (
+                              <a 
+                                href={`https://wa.me/${patient.phone.replace(/\D/g, '')}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="whatsapp-icon-link"
+                                title="Falar no WhatsApp"
+                                style={{ display: 'inline-flex', color: '#25D366' }}
+                              >
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.967C16.528 2.012 14.07 1.002 11.47 1.002c-5.443 0-9.87 4.37-9.874 9.8-.001 1.737.457 3.432 1.328 4.93L1.919 21.1l5.578-1.456c-.287.165-.589.336-.85.51zM17.487 14.4c-.27-.136-1.602-.79-1.85-.88-.25-.09-.432-.136-.612.136-.18.273-.697.88-.853 1.06-.157.18-.314.2-.584.065-.27-.136-1.138-.42-2.17-1.34-1.03-.92-1.724-2.06-1.927-2.4-.203-.34-.022-.523.147-.69.153-.15.314-.365.47-.55.158-.18.21-.31.315-.515.105-.2.052-.38-.026-.517-.078-.135-.612-1.482-.84-2.028-.22-.53-.442-.46-.61-.47h-.52c-.18 0-.47.07-.72.34-.25.27-.95.93-.95 2.27s.98 2.62 1.11 2.8c.14.18 1.93 2.94 4.67 4.12.65.28 1.16.45 1.56.57.65.2 1.25.18 1.72.11.53-.08 1.6-.66 1.83-1.28.23-.62.23-1.16.16-1.28-.07-.1-.26-.18-.53-.32z"/>
+                                </svg>
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="info-fields-row">
+                        <div className="info-field-box">
+                          <label>Link do paciente <span className="help-info-icon" title="O paciente pode acessar seus planos alimentares e orientações por este link público.">ⓘ</span></label>
+                          <div className="link-copy-wrapper">
+                            <span className="patient-link-url">{`https://paciente.me/${patient.id}`}</span>
+                            <div className="link-actions">
+                              <button 
+                                className="link-action-btn"
+                                title="Copiar Link"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(`https://paciente.me/${patient.id}`);
+                                  alert('Link do paciente copiado para a área de transferência!');
+                                }}
+                              >
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                              </button>
+                              <a 
+                                href={`https://paciente.me/${patient.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="link-action-btn"
+                                title="Abrir Link"
+                              >
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                  <polyline points="15 3 21 3 21 9"></polyline>
+                                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="info-field-box">
+                          <label>Já logou no aplicativo?</label>
+                          <div className="info-field-value status-badge-no">Não</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Fluxo de consulta */}
+                <div className="perfil-section-card">
+                  <div className="perfil-card-header">
+                    <h3>Fluxo de consulta</h3>
+                    <button className="perfil-config-btn" onClick={() => alert('Configuração do fluxo de consulta disponível no plano profissional.')}>Configurar</button>
+                  </div>
+                  <div className="flow-shortcuts-grid">
+                    <button className="flow-shortcut-card" onClick={() => setActiveTab('retorno')}>
+                      <div className="flow-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      </div>
+                      <span className="flow-label">registrar consulta</span>
+                    </button>
+                    <button className="flow-shortcut-card" onClick={() => setActiveTab('retorno')}>
+                      <div className="flow-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                      </div>
+                      <span className="flow-label">agendar paciente</span>
+                    </button>
+                    <button className="flow-shortcut-card" onClick={() => setActiveTab('anamnese')}>
+                      <div className="flow-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                      </div>
+                      <span className="flow-label">adicionar anamnese</span>
+                    </button>
+                    <button className="flow-shortcut-card" onClick={() => setShowAntropometriaModal(true)}>
+                      <div className="flow-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="12" y1="4" x2="12" y2="20"></line>
+                          <line x1="9" y1="20" x2="15" y2="20"></line>
+                          <path d="M18 20V10a6 6 0 0 0-12 0v10"></path>
+                        </svg>
+                      </div>
+                      <span className="flow-label">adicionar antropometria</span>
+                    </button>
+                    <button className="flow-shortcut-card" onClick={() => setActiveTab('prescrever')}>
+                      <div className="flow-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                      </div>
+                      <span className="flow-label">adicionar planejamento</span>
+                    </button>
+                    <button className="flow-shortcut-card" onClick={() => setActiveTab('impressos')}>
+                      <div className="flow-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                          <polyline points="14 2 14 8 20 8"></polyline>
+                          <line x1="16" y1="13" x2="8" y2="13"></line>
+                          <line x1="16" y1="17" x2="8" y2="17"></line>
+                          <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                      </div>
+                      <span className="flow-label">adicionar orientação</span>
+                    </button>
+                    <button className="flow-shortcut-card" onClick={() => setActiveTab('impressos')}>
+                      <div className="flow-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M10 2v7.586l7.243 7.243a2 2 0 0 1 0 2.828v0a2 2 0 0 1-2.828 0L7.172 12.414A2 2 0 0 1 6.586 11V2h4z"></path>
+                          <line x1="3" y1="22" x2="21" y2="22"></line>
+                        </svg>
+                      </div>
+                      <span className="flow-label">adicionar manipulados</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3. Ajustes do paciente */}
+                <div className="perfil-section-card">
+                  <div className="perfil-card-header">
+                    <h3>Ajustes do paciente</h3>
+                  </div>
+                  <div className="settings-toggles-list">
+                    <div className="settings-toggle-row">
+                      <span className="toggle-label">Habilitar acesso ao link do paciente (conteúdos do paciente.me/{patient.id})</span>
+                      <label className="switch-toggle">
+                        <input type="checkbox" checked={linkAccess} onChange={(e) => setLinkAccess(e.target.checked)} />
+                        <span className="switch-slider"></span>
+                      </label>
+                    </div>
+                    <div className="settings-toggle-row">
+                      <span className="toggle-label">Habilitar acesso ao aplicativo WebDiet</span>
+                      <label className="switch-toggle">
+                        <input type="checkbox" checked={appAccess} onChange={(e) => setAppAccess(e.target.checked)} />
+                        <span className="switch-slider"></span>
+                      </label>
+                    </div>
+                    <div className="settings-toggle-row">
+                      <span className="toggle-label">Habilitar funcionalidade WebDiet+ para o paciente</span>
+                      <label className="switch-toggle">
+                        <input type="checkbox" checked={plusAccess} onChange={(e) => setPlusAccess(e.target.checked)} />
+                        <span className="switch-slider"></span>
+                      </label>
+                    </div>
+                    <div className="settings-toggle-row" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '16px', marginTop: '4px' }}>
+                      <span className="toggle-label" style={{ color: 'var(--text-secondary)' }}>Demais ajustes de aplicativo WebDiet</span>
+                      <button className="perfil-config-btn" onClick={() => alert('Configurações adicionais abertas.')}>Configurar</button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. Diário alimentar */}
+                <div className="perfil-section-card">
+                  <div className="perfil-card-header">
+                    <h3>Diário alimentar</h3>
+                  </div>
+                  <div className="diario-summary-body">
+                    {patientDiarioPosts.length === 0 ? (
+                      <p className="no-diario-message">
+                        Nenhuma foto de diário alimentar foi enviada pelo seu paciente. Você pode solicitar que ele use o aplicativo para enviar as fotos e você acompanhar o andamento do plano alimentar.
+                      </p>
+                    ) : (
+                      <div className="diario-summary-active">
+                        <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                          O paciente já enviou {patientDiarioPosts.length} postagens no diário alimentar.
+                        </p>
+                        <button className="btn-teal" style={{ width: 'auto' }} onClick={() => setActiveTab('diario')}>
+                          Ver Diário Alimentar do Paciente
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* ANAMNESE */}
             {activeTab === 'anamnese' && (
               <div>
@@ -867,6 +1114,105 @@ const PatientProfile = ({ patient, onEdit, onBack }) => {
           </div>
         </div>
       </div>
+
+      {/* Anthropometria Modal */}
+      <Modal 
+        isOpen={showAntropometriaModal} 
+        onClose={() => setShowAntropometriaModal(false)}
+        title="Adicionar Antropometria Geral"
+      >
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          const w = parseFloat(weight);
+          const h = parseFloat(height);
+          if (!w || !h) {
+            alert('Por favor, preencha peso e altura.');
+            return;
+          }
+          const bmi = (w / (h * h)).toFixed(1);
+          const newEntry = {
+            id: Date.now().toString(),
+            date: new Date().toLocaleDateString('pt-BR'),
+            weight: weight,
+            height: height,
+            bf: bfPercentage || 'Não informada',
+            bmi: bmi
+          };
+          setAntropometriaHistory(prev => [newEntry, ...prev]);
+          setShowAntropometriaModal(false);
+          setWeight('');
+          setHeight('');
+          setBfPercentage('');
+          alert('Dados antropométricos registrados com sucesso!');
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div className="form-group">
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>Peso (kg)</label>
+              <input 
+                type="number" 
+                step="0.1" 
+                placeholder="Ex: 70.5" 
+                className="form-control" 
+                value={weight} 
+                onChange={(e) => setWeight(e.target.value)} 
+                required 
+              />
+            </div>
+            <div className="form-group">
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>Altura (m)</label>
+              <input 
+                type="number" 
+                step="0.01" 
+                placeholder="Ex: 1.75" 
+                className="form-control" 
+                value={height} 
+                onChange={(e) => setHeight(e.target.value)} 
+                required 
+              />
+            </div>
+            <div className="form-group">
+              <label style={{ display: 'block', marginBottom: '4px', fontSize: '12px' }}>Gordura Corporal - BF (%)</label>
+              <input 
+                type="number" 
+                step="0.1" 
+                placeholder="Ex: 15.4" 
+                className="form-control" 
+                value={bfPercentage} 
+                onChange={(e) => setBfPercentage(e.target.value)} 
+              />
+            </div>
+            
+            {weight && height && (
+              <div style={{ padding: '10px 14px', backgroundColor: 'var(--primary-teal-light)', border: '1px solid var(--primary-teal-border)', borderRadius: '6px', fontSize: '13px' }}>
+                <strong>IMC Calculado:</strong> {(parseFloat(weight) / (parseFloat(height) * parseFloat(height))).toFixed(1)} kg/m²
+              </div>
+            )}
+
+            <button type="submit" className="btn-teal" style={{ marginTop: '8px' }}>
+              Salvar Registro
+            </button>
+          </div>
+        </form>
+        
+        {/* Antropometria History list */}
+        <div style={{ marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px' }}>
+          <h4 style={{ fontSize: '13px', marginBottom: '8px', color: 'var(--text-primary)' }}>Histórico Recente</h4>
+          {antropometriaHistory.length === 0 ? (
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>Nenhum registro anterior.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '150px', overflowY: 'auto' }}>
+              {antropometriaHistory.map(item => (
+                <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.15)', padding: '8px 12px', borderRadius: '4px', fontSize: '12px' }}>
+                  <span><strong>{item.date}</strong></span>
+                  <span>{item.weight} kg | {item.height} m</span>
+                  <span>BF: {item.bf}%</span>
+                  <span style={{ color: 'var(--text-teal)', fontWeight: '600' }}>IMC: {item.bmi}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };
