@@ -367,63 +367,173 @@ input:checked + .slider:before {
   height: 100%;
 }
 
-/* Community & Prescriptions Widgets */
-.dashboard-grid-small {
+/* Prescrições Recentes — widget largura total */
+.prescricoes-full-card {
+  margin-bottom: 32px;
+  background: linear-gradient(
+    135deg,
+    rgba(var(--primary-teal-rgb, 32, 178, 170), 0.06) 0%,
+    var(--bg-card) 60%
+  );
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  animation: fadeSlideUp 0.4s ease both;
+}
+
+.presc-icon {
+  font-size: 20px;
+  margin-right: 4px;
+}
+
+.prescricoes-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
 }
 
-@media (max-width: 900px) {
-  .dashboard-grid-small {
-    grid-template-columns: 1fr;
-  }
-}
-
-.comm-presc-list {
+.presc-card-full {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.comm-presc-card {
-  padding: 14px 18px;
-  background-color: rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 6px;
-  transition: var(--transition-fast);
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.comm-presc-card:hover {
-  background-color: var(--bg-card-hover);
-  border-color: rgba(255, 255, 255, 0.1);
+.presc-card-full::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--primary-teal), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  border-radius: 10px 0 0 10px;
 }
 
-.comm-title {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 6px;
+.presc-card-full:hover {
+  background: rgba(var(--primary-teal-rgb, 32, 178, 170), 0.08);
+  border-color: var(--primary-teal-border);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
 
-.comm-date {
-  font-size: 11px;
-  color: var(--text-secondary);
+.presc-card-full:hover::before {
+  opacity: 1;
+}
+
+.presc-card-icon {
+  font-size: 26px;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--primary-teal-rgb, 32, 178, 170), 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(var(--primary-teal-rgb, 32, 178, 170), 0.15);
+}
+
+.presc-card-body {
+  flex: 1;
+  min-width: 0;
 }
 
 .presc-type {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .presc-details {
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .presc-details strong {
   color: var(--text-primary);
+}
+
+.presc-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.presc-arrow {
+  font-size: 18px;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.presc-card-full:hover .presc-arrow {
+  color: var(--primary-teal);
+  transform: translateX(4px);
+}
+
+/* Animação de entrada dos widgets */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  animation: fadeSlideUp 0.35s ease both;
+}
+
+/* Melhoria visual dos cards de pacientes */
+.patient-widget-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.patient-widget-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 80%, rgba(var(--primary-teal-rgb, 32, 178, 170), 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.patient-widget-item:hover::after {
+  opacity: 1;
+}
+
+/* Melhoria visual do chart container */
+.chart-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 110%, rgba(var(--primary-teal-rgb, 32, 178, 170), 0.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .prescricoes-grid {
+    grid-template-columns: 1fr;
+  }
 }
