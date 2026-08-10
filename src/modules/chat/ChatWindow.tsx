@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
 
 const ChatWindow: React.FC = () => {
@@ -6,6 +6,10 @@ const ChatWindow: React.FC = () => {
   const [selectedPatientId, setSelectedPatientId] = useState(patients[0]?.id || '');
   const [typedMessage, setTypedMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    if (!selectedPatientId && patients[0]) setSelectedPatientId(patients[0].id);
+  }, [patients, selectedPatientId]);
 
   const activePatient = patients.find(p => p.id === selectedPatientId);
   const thread = chats[selectedPatientId] || [];

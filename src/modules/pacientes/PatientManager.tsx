@@ -13,14 +13,19 @@ const PatientManager: React.FC = () => {
     patients, 
     addPatient, 
     updatePatient, 
+    deletePatient,
     selectedPatientId, 
     setSelectedPatientId,
     triggerPatientCreate,
-    setTriggerPatientCreate
+    setTriggerPatientCreate,
+    dataLoading,
+    dataError,
+    refreshClinicalData,
   } = useContext(AppContext);
 
   const [mode, setMode] = useState<PatientManagerMode>('list');
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
+  const [operationError, setOperationError] = useState<string | null>(null);
 
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,28 +54,34 @@ const PatientManager: React.FC = () => {
     }
   }, [triggerPatientCreate, setTriggerPatientCreate]);
 
-  const handleSave = (patientData: Partial<Patient> & { name: string }) => {
-    if (patientData.id) {
-      updatePatient(patientData as Partial<Patient> & { id: string });
-      setSelectedPatientId(patientData.id);
-      setMode('view');
-    } else {
-      // addPatient expects name, nickname, cpf, phone, email, gender, birthDate, tags, notes
-      const created = addPatient({
-        name: patientData.name,
-        nickname: patientData.nickname || '',
-        cpf: patientData.cpf || '',
-        phone: patientData.phone || '',
-        email: patientData.email || '',
-        gender: patientData.gender || 'Feminino',
-        birthDate: patientData.birthDate || '',
-        tags: patientData.tags || [],
-        notes: patientData.notes || ''
-      });
-      setSelectedPatientId(created.id);
-      setMode('view');
+  const handleSave = async (patientData: Partial<Patient> & { name: string }) => {
+    setOperationError(null);
+    try {
+      if (patientData.id) {
+        await updatePatient(patientData as Partial<Patient> & { id: string });
+        setSelectedPatientId(patientData.id);
+        setMode('view');
+      } else {
+        const created = await addPatient({
+          name: patientData.name,
+          nickname: patientData.nickname || '',
+          cpf: patientData.cpf || '',
+          phone: patientData.phone || '',
+          email: patientData.email || '',
+          gender: patientData.gender || 'Feminino',
+          birthDate: patientData.birthDate || '',
+          tags: patientData.tags || [],
+          notes: patientData.notes || ''
+        });
+        setSelectedPatientId(created.id);
+        setMode('view');
+      }
+      setEditingPatient(null);
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : 'Não foi possível salvar o paciente.';
+      setOperationError(message);
+      throw cause;
     }
-    setEditingPatient(null);
   };
 
   const handleCancel = () => {
@@ -86,6 +97,19 @@ const PatientManager: React.FC = () => {
   const handleEditClick = (patient: Patient) => {
     setEditingPatient(patient);
     setMode('edit');
+  };
+
+  const handleDelete = async (patient: Patient) => {
+    if (!window.confirm(`Arquivar ${patient.name}? O paciente sairá das telas ativas, mas seu histórico e a auditoria serão preservados.`)) return;
+    setOperationError(null);
+    try {
+      await deletePatient(patient.id);
+      setEditingPatient(null);
+      setSelectedPatientId(null);
+      setMode('list');
+    } catch (cause) {
+      setOperationError(cause instanceof Error ? cause.message : 'Não foi possível arquivar o paciente.');
+    }
   };
 
   const handlePatientSelect = (patientId: string) => {
@@ -143,12 +167,18 @@ const PatientManager: React.FC = () => {
 
   return (
     <div className="main-content">
+      {mode !== 'list' && (dataError || operationError) && (
+        <div className="data-feedback error" role="alert">
+          <span>{operationError ?? dataError}</span>
+          <button type="button" onClick={() => void refreshClinicalData()}>Tentar novamente</button>
+        </div>
+      )}
       {mode === 'list' && (
         <div className="patients-container">
           <div className="patients-page-header-premium">
             <div className="header-left">
               <h1 className="header-title">Pacientes cadastrados</h1>
-              <span className="header-subtitle">Total de pacientes: {patients.length + 53}</span>
+              <span className="header-subtitle">Total de pacientes: {patients.length}</span>
             </div>
             <div className="header-right">
               <a href="#export" onClick={(e) => { e.preventDefault(); alert('Exportando pacientes...'); }} className="header-link">Exportar pacientes</a>
@@ -160,6 +190,13 @@ const PatientManager: React.FC = () => {
           <button className="btn-teal-large-lowercase" onClick={handleAddPatientTrigger}>
             adicionar paciente
           </button>
+
+          {(dataError || operationError) && (
+            <div className="data-feedback error" role="alert">
+              <span>{operationError ?? dataError}</span>
+              <button type="button" onClick={() => void refreshClinicalData()}>Tentar novamente</button>
+            </div>
+          )}
           
           <div className="patient-search-box">
             <span className="search-icon">🔍</span>
@@ -258,21 +295,15 @@ const PatientManager: React.FC = () => {
           )}
           
           <div className="patients-grid-list-premium">
-            {filteredPatients.map(patient => (
+            {!dataLoading && filteredPatients.map(patient => (
               <div 
                 key={patient.id} 
                 className="patient-grid-card-premium" 
                 onClick={() => handlePatientSelect(patient.id)}
               >
                 <div className="patient-card-header-premium">
-                  <div className="patient-card-avatar-premium">
-                    <img 
-                      src={patient.gender === 'Masculino' 
-                        ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80' 
-                        : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'
-                      } 
-                      alt="Perfil" 
-                    />
+                  <div className="patient-card-avatar-premium" aria-hidden="true">
+                    <span>{patient.name.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase()}</span>
                   </div>
                   <div className="patient-card-info-premium">
                     <div className="patient-card-title-premium">{patient.name}</div>
@@ -288,10 +319,10 @@ const PatientManager: React.FC = () => {
                         className="patient-tag-remove-btn"
                         onClick={(e) => {
                           e.stopPropagation();
-                          updatePatient({
+                          void updatePatient({
                             id: patient.id,
                             tags: patient.tags.filter(t => t !== tag)
-                          });
+                          }).catch((cause) => setOperationError(cause instanceof Error ? cause.message : 'Não foi possível remover a tag.'));
                         }}
                         title="Remover tag"
                       >
@@ -305,10 +336,10 @@ const PatientManager: React.FC = () => {
                       e.stopPropagation();
                       const newTag = prompt('Digite o nome da nova tag:');
                       if (newTag && newTag.trim() !== '') {
-                        updatePatient({
+                        void updatePatient({
                           id: patient.id,
                           tags: [...(patient.tags || []), newTag.trim()]
-                        });
+                        }).catch((cause) => setOperationError(cause instanceof Error ? cause.message : 'Não foi possível adicionar a tag.'));
                       }
                     }}
                   >
@@ -317,9 +348,16 @@ const PatientManager: React.FC = () => {
                 </div>
               </div>
             ))}
-            {filteredPatients.length === 0 && (
+            {dataLoading && (
+              <div className="empty-state" style={{ gridColumn: '1 / -1' }} role="status">
+                <strong>Carregando pacientes…</strong>
+                <span>Buscando os dados protegidos da clínica.</span>
+              </div>
+            )}
+            {!dataLoading && filteredPatients.length === 0 && (
               <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-                Nenhum paciente encontrado com os filtros selecionados.
+                <strong>{patients.length === 0 ? 'Sua clínica ainda não possui pacientes.' : 'Nenhum paciente encontrado.'}</strong>
+                <div style={{ marginTop: '8px' }}>{patients.length === 0 ? 'Cadastre o primeiro paciente para começar.' : 'Ajuste os filtros ou a busca.'}</div>
               </div>
             )}
           </div>
@@ -338,6 +376,7 @@ const PatientManager: React.FC = () => {
         <PatientProfile 
           patient={activePatient} 
           onEdit={handleEditClick} 
+          onDelete={handleDelete}
           onBack={() => {
             setMode('list');
             setSelectedPatientId(null);

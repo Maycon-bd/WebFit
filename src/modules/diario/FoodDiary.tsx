@@ -1,10 +1,14 @@
-import React, { useState, useContext } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
 
 const FoodDiary: React.FC = () => {
   const { notifications, patients, sendChatMessage } = useContext(AppContext);
   const [selectedPatientId, setSelectedPatientId] = useState(patients[0]?.id || '');
   const [comments, setComments] = useState<{ [postId: string]: string }>({});
+
+  useEffect(() => {
+    if (!selectedPatientId && patients[0]) setSelectedPatientId(patients[0].id);
+  }, [patients, selectedPatientId]);
 
   const handleSendComment = (postId: string, text: string) => {
     if (!text.trim()) return;

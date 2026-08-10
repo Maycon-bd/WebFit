@@ -1,5 +1,6 @@
 -- WebFit initial multi-clinic schema.
 -- All exposed tables use RLS. The browser must only use a publishable key.
+-- Applied to the WEBFIT project as migration 20260810125701.
 
 create schema if not exists private;
 revoke all on schema private from public, anon, authenticated;

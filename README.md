@@ -6,7 +6,7 @@ O **WebFit** é um protótipo funcional de alta fidelidade visual desenvolvido p
 
 ### Nova fundação Supabase
 
-O projeto já contém a primeira fundação de backend em `supabase/`: configuração local, migration multi-clínica, RLS em todas as tabelas expostas, bucket privado para arquivos clínicos, índices e Realtime para mensagens e notificações. Quando as variáveis Supabase estão presentes, o front habilita autenticação e onboarding de clínica; sem elas, continua em modo de demonstração local.
+O projeto já contém a primeira fundação de backend em `supabase/`: configuração local, migration multi-clínica, RLS em todas as tabelas expostas, bucket privado para arquivos clínicos, índices e Realtime para mensagens e notificações. Quando as variáveis Supabase estão presentes, o front habilita autenticação e onboarding de clínica. Pacientes e agendamentos já usam CRUD remoto tipado; os demais módulos começam vazios e serão migrados gradualmente, sem registros demonstrativos.
 
 ```bash
 copy .env.example .env

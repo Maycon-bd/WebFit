@@ -12,10 +12,7 @@ const SiteBuilder: React.FC = () => {
   const { siteSettings, setSiteSettings } = useContext(AppContext);
   const [testLeadName, setTestLeadName] = useState('');
   const [testLeadEmail, setTestLeadEmail] = useState('');
-  const [leads, setLeads] = useState<Lead[]>([
-    { name: 'Marcos de Almeida', email: 'marcos.almeida@email.com', date: '19/06/2026' },
-    { name: 'Priscila Mendes', email: 'priscila.mendes@email.com', date: '18/06/2026' }
-  ]);
+  const [leads, setLeads] = useState<Lead[]>([]);
 
   const handleChange = (key: keyof SiteSettings, value: string) => {
     setSiteSettings(prev => ({

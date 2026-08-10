@@ -12,7 +12,7 @@ const Financials: React.FC = () => {
   
   const [selectedPatientId, setSelectedPatientId] = useState(patients[0]?.id || '');
   const [customClientName, setCustomClientName] = useState('');
-  const [value, setValue] = useState('250.00');
+  const [value, setValue] = useState('');
   const [method, setMethod] = useState('PIX');
   const [isAdding, setIsAdding] = useState(false);
 
@@ -23,6 +23,10 @@ const Financials: React.FC = () => {
       setTriggerFinancialsCreate(false);
     }
   }, [triggerFinancialsCreate, setTriggerFinancialsCreate]);
+
+  useEffect(() => {
+    if (!selectedPatientId && patients[0]) setSelectedPatientId(patients[0].id);
+  }, [patients, selectedPatientId]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

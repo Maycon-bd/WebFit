@@ -99,13 +99,7 @@ const PatientListWidget: React.FC<PatientListWidgetProps> = ({ onAddPatientClick
               onClick={() => handlePatientClick(patient.id)}
             >
               <div className="patient-widget-avatar">
-                <img
-                  src={patient.gender === 'Masculino'
-                    ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80'
-                    : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80'
-                  }
-                  alt="Perfil"
-                />
+                <span className="patient-initials" aria-label={`Iniciais de ${patient.name}`}>{patient.name.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase()}</span>
               </div>
               <div className="patient-widget-info">
                 <div className="patient-widget-name">{patient.name}</div>

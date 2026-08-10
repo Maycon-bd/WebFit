@@ -7,7 +7,7 @@ import type { MessageTemplate } from '../../types';
 type MarketingSubTab = 'canvas' | 'mensagens' | 'modelos' | 'beneficios' | 'nutrilinks' | 'site';
 
 const MarketingPanel: React.FC = () => {
-  const { messageTemplates, setMessageTemplates } = useContext(AppContext);
+  const { messageTemplates, setMessageTemplates, userProfile } = useContext(AppContext);
   const [activeSubTab, setActiveSubTab] = useState<MarketingSubTab>('canvas');
 
   // Modelos de Mensagens local editors
@@ -204,11 +204,11 @@ const MarketingPanel: React.FC = () => {
               <div className="card" style={{ backgroundColor: 'rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div className="form-group">
                   <label>Link Personalizado</label>
-                  <input type="text" className="form-control" defaultValue="webfit.com/dra.marinasilva" disabled />
+                  <input type="text" className="form-control" value={userProfile.name ? `webfit.app/${userProfile.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}` : ''} readOnly />
                 </div>
                 <div className="form-group">
                   <label>Link do WhatsApp</label>
-                  <input type="text" className="form-control" defaultValue="wa.me/5511999999999" />
+                  <input type="text" className="form-control" value={userProfile.whatsapp ? `wa.me/${userProfile.whatsapp.replace(/\D/g, '')}` : ''} readOnly placeholder="Configure seu WhatsApp no perfil" />
                 </div>
                 <button className="btn-teal" onClick={() => alert('Link copiado para a área de transferência!')}>
                   Copiar NutriLink Principal
@@ -218,9 +218,9 @@ const MarketingPanel: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <div style={{ width: '220px', border: '8px solid #1e293b', borderRadius: '24px', height: '360px', padding: '16px', backgroundColor: '#090e15', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                   <div style={{ width: '44px', height: '44px', borderRadius: '50%', overflow: 'hidden', border: '1.5px solid var(--primary-teal)' }}>
-                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80" alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <span className="patient-initials">{userProfile.name.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase()}</span>
                   </div>
-                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'white' }}>Dra. Marina Silva</span>
+                  <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'white' }}>{userProfile.name}</span>
                   <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
                     {['Agende sua Consulta', 'Meus E-books de Receita', 'Dicas no Instagram'].map((linkText, idx) => (
                       <div key={idx} style={{ width: '100%', backgroundColor: 'var(--primary-teal)', color: 'white', fontSize: '9.5px', padding: '8px', borderRadius: '4px', textAlign: 'center', fontWeight: 'bold', cursor: 'pointer' }}>

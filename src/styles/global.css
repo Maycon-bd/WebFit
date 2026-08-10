@@ -280,3 +280,21 @@ a:hover {
   .main-content { padding: 20px 14px 36px; }
   .card { padding: 17px; border-radius: 15px; }
 }
+.empty-state {
+  display: flex;
+  min-height: 120px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  padding: 28px;
+  text-align: center;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border-color);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--bg-card) 82%, transparent);
+}
+
+.empty-state strong {
+  color: var(--text-primary);
+}

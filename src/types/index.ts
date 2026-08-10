@@ -198,9 +198,12 @@ export interface AppContextType {
 
   // Patients
   patients: Patient[];
-  addPatient: (data: Omit<Patient, 'id' | 'lastModified' | 'status'>) => Patient;
-  updatePatient: (updated: Partial<Patient> & { id: string }) => void;
-  deletePatient: (id: string) => void;
+  dataLoading: boolean;
+  dataError: string | null;
+  refreshClinicalData: () => Promise<void>;
+  addPatient: (data: Omit<Patient, 'id' | 'lastModified' | 'status'>) => Promise<Patient>;
+  updatePatient: (updated: Partial<Patient> & { id: string }) => Promise<void>;
+  deletePatient: (id: string) => Promise<void>;
 
   // Planner
   plannerTasks: PlannerTask[];
@@ -218,8 +221,8 @@ export interface AppContextType {
 
   // Appointments
   appointments: Appointment[];
-  addAppointment: (data: Omit<Appointment, 'id' | 'patientName' | 'status'>) => void;
-  cancelAppointment: (id: string) => void;
+  addAppointment: (data: Omit<Appointment, 'id' | 'patientName' | 'status'>) => Promise<void>;
+  cancelAppointment: (id: string) => Promise<void>;
 
   // Financials
   financials: Financial[];

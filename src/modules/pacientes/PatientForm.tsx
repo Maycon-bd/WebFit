@@ -3,7 +3,7 @@ import type { Patient } from '../../types';
 
 interface PatientFormProps {
   patient: Patient | null;
-  onSave: (patientData: Partial<Patient> & { name: string }) => void;
+  onSave: (patientData: Partial<Patient> & { name: string }) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -17,6 +17,8 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSave, onCancel }) 
   const [birthDate, setBirthDate] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   const [notes, setNotes] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     if (patient) {
@@ -32,7 +34,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSave, onCancel }) 
     }
   }, [patient]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (name.trim() === '') {
       alert('O nome do paciente é obrigatório!');
@@ -57,7 +59,15 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSave, onCancel }) 
       notes
     };
 
-    onSave(patientData);
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await onSave(patientData);
+    } catch (cause) {
+      setSubmitError(cause instanceof Error ? cause.message : 'Não foi possível salvar o paciente.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -166,15 +176,18 @@ const PatientForm: React.FC<PatientFormProps> = ({ patient, onSave, onCancel }) 
           />
         </div>
 
+        {submitError && <div className="data-feedback error" role="alert">{submitError}</div>}
+
         <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-          <button type="submit" className="btn-teal">
-            Salvar Dados
+          <button type="submit" className="btn-teal" disabled={submitting}>
+            {submitting ? 'Salvando…' : 'Salvar dados'}
           </button>
           <button 
             type="button" 
             className="btn-teal" 
             style={{ backgroundColor: 'var(--bg-card-hover)', border: '1px solid rgba(255,255,255,0.1)' }}
             onClick={onCancel}
+            disabled={submitting}
           >
             Cancelar
           </button>

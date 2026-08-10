@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { AppContext } from '../../context/AppContext';
 
 type CanvasTemplate = 'dica' | 'receita' | 'agendamento';
 
 const ContentStudio: React.FC = () => {
+  const { userProfile } = useContext(AppContext);
   const [template, setTemplate] = useState<CanvasTemplate>('dica');
   const [title, setTitle] = useState('Dica de Nutrição Saudável');
   const [subtitle, setSubtitle] = useState('Beba água logo ao acordar para ativar seu metabolismo!');
@@ -128,7 +130,7 @@ const ContentStudio: React.FC = () => {
             </div>
 
             <div style={{ fontSize: '9px', opacity: 0.6, textAlign: 'right' }}>
-              Dra. Marina Silva - Nutricionista
+              {userProfile.name} · Nutrição
             </div>
           </div>
         </div>

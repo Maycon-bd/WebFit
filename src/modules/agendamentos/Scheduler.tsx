@@ -8,7 +8,11 @@ const Scheduler: React.FC = () => {
     cancelAppointment, 
     patients,
     triggerAppointmentCreate,
-    setTriggerAppointmentCreate
+    setTriggerAppointmentCreate,
+    dataLoading,
+    dataError,
+    refreshClinicalData,
+    setActivePage,
   } = useContext(AppContext);
   
   const [selectedPatientId, setSelectedPatientId] = useState(patients[0]?.id || '');
@@ -16,6 +20,12 @@ const Scheduler: React.FC = () => {
   const [time, setTime] = useState('09:00');
   const [type, setType] = useState<'Presencial' | 'Online'>('Presencial');
   const [isAdding, setIsAdding] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [operationError, setOperationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedPatientId && patients[0]) setSelectedPatientId(patients[0].id);
+  }, [patients, selectedPatientId]);
 
   // Sync state for quick action 'novo agendamento'
   useEffect(() => {
@@ -25,21 +35,23 @@ const Scheduler: React.FC = () => {
     }
   }, [triggerAppointmentCreate, setTriggerAppointmentCreate]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedPatientId) {
       alert('Selecione um paciente!');
       return;
     }
     
-    addAppointment({
-      patientId: selectedPatientId,
-      date,
-      time,
-      type
-    });
-    alert('Consulta agendada com sucesso!');
-    setIsAdding(false);
+    setSubmitting(true);
+    setOperationError(null);
+    try {
+      await addAppointment({ patientId: selectedPatientId, date, time, type });
+      setIsAdding(false);
+    } catch (cause) {
+      setOperationError(cause instanceof Error ? cause.message : 'Não foi possível agendar a consulta.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Sort appointments by date and time
@@ -51,10 +63,17 @@ const Scheduler: React.FC = () => {
     <div className="main-content">
       <div className="patients-page-header" style={{ marginBottom: '24px' }}>
         <h1 style={{ fontSize: '20px' }}>Agenda & Agendamentos</h1>
-        <button className="btn-teal" style={{ width: 'auto' }} onClick={() => setIsAdding(!isAdding)}>
+        <button className="btn-teal" style={{ width: 'auto' }} onClick={() => setIsAdding(!isAdding)} disabled={!isAdding && patients.length === 0}>
           {isAdding ? 'Ver Compromissos' : '+ Agendar Consulta'}
         </button>
       </div>
+
+      {(dataError || operationError) && (
+        <div className="data-feedback error" role="alert">
+          <span>{operationError ?? dataError}</span>
+          <button type="button" onClick={() => void refreshClinicalData()}>Tentar novamente</button>
+        </div>
+      )}
 
       {isAdding ? (
         <div className="card" style={{ maxWidth: '500px', margin: '0 auto' }}>
@@ -106,12 +125,13 @@ const Scheduler: React.FC = () => {
             </div>
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-              <button type="submit" className="btn-teal">Agendar</button>
+              <button type="submit" className="btn-teal" disabled={submitting}>{submitting ? 'Agendando…' : 'Agendar'}</button>
               <button 
                 type="button" 
                 className="btn-teal" 
                 style={{ backgroundColor: 'var(--bg-card-hover)', border: '1px solid rgba(255,255,255,0.1)' }}
                 onClick={() => setIsAdding(false)}
+                disabled={submitting}
               >
                 Cancelar
               </button>
@@ -122,6 +142,19 @@ const Scheduler: React.FC = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
           <div className="card">
             <h2 style={{ marginBottom: '16px', fontSize: '18px' }}>Lista de Compromissos Cadastrados</h2>
+            {dataLoading && <div className="empty-state" role="status"><strong>Carregando agenda…</strong></div>}
+            {!dataLoading && patients.length === 0 && (
+              <div className="empty-state">
+                <strong>Cadastre um paciente antes de criar a primeira consulta.</strong>
+                <button type="button" className="btn-teal" onClick={() => setActivePage('pacientes')}>Cadastrar paciente</button>
+              </div>
+            )}
+            {!dataLoading && patients.length > 0 && sortedAppointments.length === 0 && (
+              <div className="empty-state">
+                <strong>Nenhum atendimento agendado.</strong>
+                <span>Use “Agendar consulta” para criar o primeiro compromisso.</span>
+              </div>
+            )}
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', textAlign: 'left' }}>
                 <thead>
@@ -135,7 +168,7 @@ const Scheduler: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedAppointments.map(ap => {
+                  {!dataLoading && sortedAppointments.map(ap => {
                     const formattedDate = ap.date.split('-').reverse().join('/');
                     return (
                       <tr key={ap.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
@@ -169,9 +202,14 @@ const Scheduler: React.FC = () => {
                               fontWeight: '600',
                               fontSize: '13px'
                             }} 
-                            onClick={() => {
+                            onClick={async () => {
                               if (window.confirm(`Deseja realmente desmarcar a consulta de ${ap.patientName}?`)) {
-                                cancelAppointment(ap.id);
+                                setOperationError(null);
+                                try {
+                                  await cancelAppointment(ap.id);
+                                } catch (cause) {
+                                  setOperationError(cause instanceof Error ? cause.message : 'Não foi possível cancelar a consulta.');
+                                }
                               }
                             }}
                           >

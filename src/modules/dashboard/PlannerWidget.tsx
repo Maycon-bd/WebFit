@@ -3,7 +3,7 @@ import { AppContext } from '../../context/AppContext';
 
 const PlannerWidget: React.FC = () => {
   const { plannerTasks, addPlannerTask, togglePlannerTask } = useContext(AppContext);
-  const [currentDate, setCurrentDate] = useState(new Date('2026-06-19'));
+  const [currentDate, setCurrentDate] = useState(() => new Date());
   const [isAdding, setIsAdding] = useState(false);
   const [newTaskText, setNewTaskText] = useState('');
 

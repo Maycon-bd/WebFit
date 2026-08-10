@@ -16,6 +16,7 @@ export const listClinicWorkspaces = async (): Promise<ClinicWorkspace[]> => {
   const { data, error } = await client
     .from('clinics')
     .select('id, name, slug')
+    .is('deleted_at', null)
     .order('created_at', { ascending: true });
   if (error) throw error;
   return data ?? [];
@@ -32,7 +33,13 @@ export const createClinicWorkspace = async (name: string, ownerId: string): Prom
     .replace(/^-|-$/g, '') || 'clinica';
   const slug = `${slugBase}-${id.slice(0, 6)}`;
 
-  const { error } = await client.from('clinics').insert({ id, owner_id: ownerId, name, slug });
+  const { error } = await client.from('clinics').insert({
+    id,
+    owner_id: ownerId,
+    created_by: ownerId,
+    name,
+    slug,
+  });
   if (error) throw error;
   return { id, name, slug };
 };

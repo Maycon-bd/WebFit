@@ -6,6 +6,7 @@ import type { Patient, AnthropometryEntry } from '../../types';
 interface PatientProfileProps {
   patient: Patient;
   onEdit: (patient: Patient) => void;
+  onDelete: (patient: Patient) => Promise<void>;
   onBack: () => void;
 }
 
@@ -233,34 +234,12 @@ interface ClinicalExams {
   [key: string]: ClinicalExam[];
 }
 
-const CLINICAL_EXAMS: ClinicalExams = {
-  '1': [
-    { name: 'Hemoglobina Glicada (HbA1c)', value: 5.4, status: 'Normal', note: 'Excelente controle glicêmico.' },
-    { name: 'Colesterol HDL', value: 48, status: 'Atenção', note: 'Levemente baixo para o sexo feminino (Referência > 50 mg/dL). Recomenda-se incentivar gorduras boas (azeite, abacate).' },
-    { name: 'Ferro Sérico', value: 42, status: 'Atenção', note: 'Abaixo do recomendado para mulheres (Referência 50-170 mcg/dL). Atenção especial pós-bariátrica.' },
-    { name: 'Vitamina B12', value: 180, status: 'Alerta', note: 'Deficiência detectada (Referência 200-900 pg/mL). Necessária suplementação devido à bariátrica.' },
-    { name: 'Glicose em Jejum', value: 88, status: 'Normal', note: 'Glicemia de jejum adequada.' }
-  ],
-  '5': [
-    { name: 'Hemoglobina Glicada (HbA1c)', value: 5.9, status: 'Atenção', note: 'Pré-diabetes detectada (Referência 5.7% - 6.4%). Foco em dieta de baixo índice glicêmico e atividades físicas.' },
-    { name: 'Colesterol HDL', value: 45, status: 'Normal', note: 'Adequado para o sexo masculino (Referência > 40 mg/dL).' },
-    { name: 'Ferro Sérico', value: 95, status: 'Normal', note: 'Dentro da normalidade.' },
-    { name: 'Vitamina B12', value: 410, status: 'Normal', note: 'Adequado.' },
-    { name: 'Glicose em Jejum', value: 104, status: 'Atenção', note: 'Levemente elevada (Referência < 100 mg/dL). Foco em restrição de carboidratos refinados.' }
-  ],
-  'default': [
-    { name: 'Hemoglobina Glicada (HbA1c)', value: 5.2, status: 'Normal', note: 'Normal.' },
-    { name: 'Colesterol HDL', value: 55, status: 'Normal', note: 'Normal.' },
-    { name: 'Ferro Sérico', value: 80, status: 'Normal', note: 'Normal.' },
-    { name: 'Vitamina B12', value: 350, status: 'Normal', note: 'Normal.' },
-    { name: 'Glicose em Jejum', value: 90, status: 'Normal', note: 'Normal.' }
-  ]
-};
+const CLINICAL_EXAMS: ClinicalExams = {};
 
 type ProfileTab = 'perfil' | 'anamnese' | 'prescrever' | 'exames' | 'preconsulta' | 'metas' | 'diario' | 'impressos' | 'retorno';
 type AntroTab = 'basico' | 'circunferencias' | 'dobras';
 
-const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onBack }) => {
+const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onDelete, onBack }) => {
   const { 
     userProfile, 
     toggleBlackStatus, 
@@ -306,34 +285,21 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onBack
   const [sfAbdomen, setSfAbdomen] = useState('');
   const [sfThigh, setSfThigh] = useState('');
 
-  const [antropometriaHistory, setAntropometriaHistory] = useState<AnthropometryEntry[]>([
-    {
-      id: '1',
-      date: '22/06/2026',
-      weight: '72.5',
-      height: '1.68',
-      bf: '24.2',
-      bmi: '25.7',
-      circunferencias: { cintura: '72', quadril: '98', abdomen: '78' },
-      dobras: { triceps: '18', subescapular: '14', suprailiaca: '16' }
-    }
-  ]);
+  const [antropometriaHistory, setAntropometriaHistory] = useState<AnthropometryEntry[]>([]);
 
   // Tab states
   const [prescriptionType, setPrescriptionType] = useState('Cardápio Semanal');
-  const [selectedTemplate, setSelectedTemplate] = useState('mt1');
+  const [selectedTemplate, setSelectedTemplate] = useState('mt3');
   const [preconsultaSent, setPreconsultaSent] = useState(false);
   const [newGoalText, setNewGoalText] = useState('');
-  const [patientGoals, setPatientGoals] = useState([
-    { id: 'g1', text: 'Consumir 2.5L de água por dia', done: false },
-    { id: 'g2', text: 'Treinar musculação 4x na semana', done: true },
-    { id: 'g3', text: 'Evitar alimentos ultraprocessados', done: false }
-  ]);
+  const [patientGoals, setPatientGoals] = useState<{ id: string; text: string; done: boolean }[]>([]);
   const [mealComments, setMealComments] = useState<{ [key: string]: string }>({});
   const [printedDocType, setPrintedDocType] = useState('Receituário de Suplementação');
-  const [returnDate, setReturnDate] = useState('2026-07-15');
+  const [returnDate, setReturnDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [returnTime, setReturnTime] = useState('14:00');
   const [returnType, setReturnType] = useState<'Presencial' | 'Online'>('Presencial');
+  const [returnSubmitting, setReturnSubmitting] = useState(false);
+  const [returnError, setReturnError] = useState<string | null>(null);
   const [today] = useState(() => new Date());
 
   const calculateAge = (birthDateStr: string) => {
@@ -384,16 +350,19 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onBack
     alert('Seu feedback foi registrado e enviado ao chat do paciente!');
   };
 
-  const handleScheduleReturn = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleScheduleReturn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    addAppointment({
-      patientId: patient.id,
-      date: returnDate,
-      time: returnTime,
-      type: returnType
-    });
-    addTransaction(patient.id, 250, 'PIX');
-    alert(`Retorno agendado com sucesso para o dia ${returnDate} às ${returnTime} (${returnType}). Faturamento financeiro gerado!`);
+    setReturnSubmitting(true);
+    setReturnError(null);
+    try {
+      await addAppointment({ patientId: patient.id, date: returnDate, time: returnTime, type: returnType });
+      addTransaction(patient.id, 250, 'PIX');
+      alert(`Retorno agendado para ${returnDate} às ${returnTime}.`);
+    } catch (cause) {
+      setReturnError(cause instanceof Error ? cause.message : 'Não foi possível agendar o retorno.');
+    } finally {
+      setReturnSubmitting(false);
+    }
   };
 
   // Filter notifications (diario photos) belonging to this patient
@@ -408,13 +377,7 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onBack
       <div className="patient-profile-header">
         <div className="profile-identity">
           <div className="profile-large-avatar">
-            <img 
-              src={patient.gender === 'Masculino' 
-                ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80' 
-                : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80'
-              } 
-              alt="Avatar do Paciente" 
-            />
+            <span className="patient-initials" aria-label={`Iniciais de ${patient.name}`}>{patient.name.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase()}</span>
           </div>
           <div className="profile-name-area">
             <h1>{patient.name}</h1>
@@ -451,6 +414,9 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onBack
         <div className="profile-actions">
           <button className="btn-teal" onClick={() => onEdit(patient)} style={{ width: 'auto' }}>
             Editar Ficha
+          </button>
+          <button className="btn-teal" onClick={() => void onDelete(patient)} style={{ width: 'auto', color: 'var(--color-danger)', background: 'transparent', border: '1px solid color-mix(in srgb, var(--color-danger) 32%, transparent)' }}>
+            Excluir
           </button>
           <button 
             className="btn-teal" 
@@ -532,13 +498,7 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onBack
                   <div className="basic-data-grid">
                     <div className="basic-data-avatar-container">
                       <div className="avatar-wrapper">
-                        <img 
-                          src={patient.gender === 'Masculino' 
-                            ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80' 
-                            : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80'
-                          } 
-                          alt="Avatar do Paciente" 
-                        />
+                        <span className="patient-initials" aria-label={`Iniciais de ${patient.name}`}>{patient.name.split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase()}</span>
                       </div>
                     </div>
                     <div className="basic-data-info-grid">
@@ -837,6 +797,10 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onBack
                   Acompanhamento clínico com valores de referência ajustados dinamicamente para o sexo: <strong>{patient.gender}</strong>.
                 </p>
 
+                {!CLINICAL_EXAMS[patient.id]?.length && (
+                  <div className="empty-state"><strong>Nenhum exame registrado.</strong><span>Os resultados aparecerão aqui após o cadastro.</span></div>
+                )}
+
                 <div className="exams-table-container">
                   <table className="exams-table">
                     <thead>
@@ -849,7 +813,7 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onBack
                       </tr>
                     </thead>
                     <tbody>
-                      {(CLINICAL_EXAMS[patient.id] || CLINICAL_EXAMS['default']).map((exam, idx) => {
+                      {(CLINICAL_EXAMS[patient.id] ?? []).map((exam, idx) => {
                         let refRange = '';
                         let badgeClass = 'status-normal';
                         
@@ -935,18 +899,7 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onBack
                 )}
 
                 <h3 style={{ marginBottom: '12px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px' }}>Respostas Enviadas</h3>
-                <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.15)', padding: '16px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.02)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <span style={{ fontWeight: '600' }}>Questionário Clínico Geral</span>
-                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Preenchido em 18/06/2026 - 15:40</span>
-                  </div>
-                  <ul style={{ listStyleType: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <li style={{ fontSize: '13px' }}><strong>1. Qual o seu principal objetivo?</strong> Reeducação e perda de peso leve, melhorar sono.</li>
-                    <li style={{ fontSize: '13px' }}><strong>2. Possui restrições ou alergias?</strong> Intolerância leve à lactose. Evita camarão.</li>
-                    <li style={{ fontSize: '13px' }}><strong>3. Pratica atividades físicas?</strong> Caminhadas na esteira 3x por semana.</li>
-                    <li style={{ fontSize: '13px' }}><strong>4. Qual o seu maior obstáculo alimentar?</strong> Vontade excessiva de doces à noite.</li>
-                  </ul>
-                </div>
+                <div className="empty-state"><strong>Nenhuma resposta recebida.</strong><span>As respostas do paciente aparecerão aqui.</span></div>
               </div>
             )}
 
@@ -1144,8 +1097,9 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onBack
                       <option value="Online">Online (Videochamada Integrada)</option>
                     </select>
                   </div>
-                  <button type="submit" className="btn-teal" style={{ width: 'auto', alignSelf: 'flex-start' }}>
-                    Confirmar Agendamento e Gerar Fatura
+                  {returnError && <div className="data-feedback error" role="alert">{returnError}</div>}
+                  <button type="submit" className="btn-teal" style={{ width: 'auto', alignSelf: 'flex-start' }} disabled={returnSubmitting}>
+                    {returnSubmitting ? 'Agendando…' : 'Confirmar agendamento'}
                   </button>
                 </form>
 

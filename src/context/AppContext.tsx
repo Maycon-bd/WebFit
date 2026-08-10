@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useCallback, useState, useEffect } from 'react';
 import type {
   AppContextType,
   AppPage,
@@ -18,10 +18,23 @@ import type {
   Chat,
 } from '../types';
 import { readStorage, readStringStorage, writeStorage } from '../services/storage';
+import { useAuth } from './AuthContext';
+import { useWorkspace } from './WorkspaceContext';
+import {
+  cancelAppointmentRecord,
+  createAppointment,
+  createPatient,
+  deletePatientRecord,
+  listAppointments,
+  listPatients,
+  updatePatientRecord,
+} from '../services/clinicalRepository';
 
 export const AppContext = createContext<AppContextType>({} as AppContextType);
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
+  const { configured, user } = useAuth();
+  const { activeClinic } = useWorkspace();
   // Navigation State
   const [activePage, setActivePage] = useState<AppPage>('dashboard');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
@@ -34,265 +47,46 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [triggerAppointmentCreate, setTriggerAppointmentCreate] = useState(false);
   const [triggerFinancialsCreate, setTriggerFinancialsCreate] = useState(false);
 
-  // 1. User Profile State
-  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
-    const saved = readStorage<UserProfile | null>('webfit_profile', null);
-    return saved ?? {
-      name: 'Dra. Marina Silva',
-      crn: 'CRN-3 12345/SP',
-      email: 'marina.nutri@webfit.com',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-      whatsapp: '5511999999999',
-      isBlack: false
-    };
+  // Perfil real do usuário autenticado; sem persona de demonstração.
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    name: 'Profissional',
+    crn: '',
+    email: '',
+    avatar: '',
+    whatsapp: '',
+    isBlack: false,
   });
 
-  // 2. Patients State
-  const [patients, setPatients] = useState<Patient[]>(() => {
-    const saved = readStorage<Patient[] | null>('webfit_patients', null);
-    if (saved) return saved;
-    return [
-      {
-        id: '1',
-        name: 'Alaine Dos Santos Pereira',
-        nickname: 'Alaine',
-        cpf: '123.456.789-00',
-        phone: '(11) 98765-4321',
-        email: 'alaine.santos@email.com',
-        gender: 'Feminino',
-        birthDate: '1995-04-12',
-        tags: ['Gestante', 'Bariátrica'],
-        lastModified: '19/06/2026 - 11:01:25',
-        notes: 'Paciente gestante em acompanhamento pós-bariátrica. Necessita de atenção especial à absorção de ferro e B12.',
-        status: 'Ativo'
-      },
-      {
-        id: '2',
-        name: 'Raiza Manuelle Marmo Santos',
-        nickname: 'Raiza',
-        cpf: '234.567.890-11',
-        phone: '(11) 98888-1111',
-        email: 'raiza.marmo@email.com',
-        gender: 'Feminino',
-        birthDate: '1998-09-22',
-        tags: ['Atleta', 'Hipertrofia'],
-        lastModified: '19/06/2026 - 10:02:09',
-        notes: 'Atleta de vôlei. Foco em ganho de massa magra e otimização de performance pré-treino.',
-        status: 'Ativo'
-      },
-      {
-        id: '3',
-        name: 'Gabriely Martins De Souza',
-        nickname: 'Gaby',
-        cpf: '345.678.901-22',
-        phone: '(11) 97777-2222',
-        email: 'gabriely.martins@email.com',
-        gender: 'Feminino',
-        birthDate: '2001-01-30',
-        tags: ['Vegetariana', 'Emagrecimento'],
-        lastModified: '19/06/2026 - 09:00:22',
-        notes: 'Transição para dieta plant-based. Foco em emagrecimento e controle de ansiedade.',
-        status: 'Ativo'
-      },
-      {
-        id: '4',
-        name: 'Elisangela Torres Correa',
-        nickname: 'Elis',
-        cpf: '456.789.012-33',
-        phone: '(11) 96666-3333',
-        email: 'elis.torres@email.com',
-        gender: 'Feminino',
-        birthDate: '1987-11-05',
-        tags: ['Diabetes', 'LowCarb'],
-        lastModified: '19/06/2026 - 08:00:45',
-        notes: 'Paciente com diabetes tipo 2. Foco em redução da hemoglobina glicada através de protocolo Low Carb.',
-        status: 'Ativo'
-      },
-      {
-        id: '5',
-        name: 'Paulo Henrique Marcelino Batista',
-        nickname: 'Paulo',
-        cpf: '567.890.123-44',
-        phone: '(11) 95555-4444',
-        email: 'paulo.marcelino@email.com',
-        gender: 'Masculino',
-        birthDate: '1990-07-18',
-        tags: ['Hipertensão', 'Reeducação'],
-        lastModified: '18/06/2026 - 21:21:29',
-        notes: 'Reeducação alimentar geral. Iniciando atividades físicas regulares. Hipertensão leve sob controle.',
-        status: 'Ativo'
-      },
-      {
-        id: '6',
-        name: 'Alessandra De Souza Soares',
-        nickname: 'Ale',
-        cpf: '678.901.234-55',
-        phone: '(11) 94444-5555',
-        email: 'alessandra.soares@email.com',
-        gender: 'Feminino',
-        birthDate: '1993-02-14',
-        tags: ['Definição', 'Funcional'],
-        lastModified: '18/06/2026 - 18:30:00',
-        notes: 'Paciente focada em definição muscular. Registra todas as refeições no diário alimentar com foto.',
-        status: 'Ativo'
-      }
-    ] as Patient[];
-  });
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [dataError, setDataError] = useState<string | null>(null);
 
   // 3. Planner / Tasks State
-  const [plannerTasks, setPlannerTasks] = useState<PlannerTask[]>(() => {
-    const saved = readStorage<PlannerTask[] | null>('webfit_tasks', null);
-    if (saved) return saved;
-    return [
-      { id: 't1', date: '2026-06-19', text: 'Enviar relatório pós-consulta da Alaine', done: false },
-      { id: 't2', date: '2026-06-19', text: 'Revisar cardápio da Raiza', done: false },
-      { id: 't3', date: '2026-06-20', text: 'Entrar em contato com Elisangela', done: false }
-    ];
-  });
+  const [plannerTasks, setPlannerTasks] = useState<PlannerTask[]>([]);
 
   // 4. Notifications State
-  const [notifications, setNotifications] = useState<Notification[]>(() => {
-    const saved = readStorage<Notification[] | null>('webfit_notifications', null);
-    if (saved) return saved;
-    return [
-      {
-        id: 'n1',
-        patientId: '6',
-        patientName: 'Alessandra De Souza Soares',
-        timestamp: '19/06/2026 - 14:35',
-        action: 'registrou uma foto no diário alimentar.',
-        mealPhoto: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=120&auto=format&fit=crop&q=80',
-        mealName: 'Almoço Saudável (Salada, Arroz Integral, Grelhado)',
-        read: false
-      },
-      {
-        id: 'n2',
-        patientId: '6',
-        patientName: 'Alessandra De Souza Soares',
-        timestamp: '18/06/2026 - 20:06',
-        action: 'registrou uma foto no diário alimentar.',
-        mealPhoto: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=120&auto=format&fit=crop&q=80',
-        mealName: 'Salada de Folhas com Salmão',
-        read: false
-      },
-      {
-        id: 'n3',
-        patientId: '6',
-        patientName: 'Alessandra De Souza Soares',
-        timestamp: '18/06/2026 - 18:30',
-        action: 'registrou uma foto no diário alimentar.',
-        mealPhoto: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=120&auto=format&fit=crop&q=80',
-        mealName: 'Prato Equilibrado (Purê de batata doce e frango)',
-        read: false
-      },
-      {
-        id: 'n4',
-        patientId: '6',
-        patientName: 'Alessandra De Souza Soares',
-        timestamp: '18/06/2026 - 18:29',
-        action: 'registrou uma foto no diário alimentar.',
-        mealPhoto: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=120&auto=format&fit=crop&q=80',
-        mealName: 'Panquecas de Aveia e Whey',
-        read: false
-      }
-    ];
-  });
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   // 5. Prescriptions State
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>(() => {
-    const saved = readStorage<Prescription[] | null>('webfit_prescriptions', null);
-    if (saved) return saved;
-    return [
-      { id: 'pr1', type: 'Cardápio Semanal', date: '19/06/2026', patientName: 'Alaine Dos Santos Pereira', patientId: '1' },
-      { id: 'pr2', type: 'Cardápio Semanal', date: '19/06/2026', patientName: 'Gabriely Martins De Souza', patientId: '3' },
-      { id: 'pr3', type: 'Cardápio Semanal', date: '18/06/2026', patientName: 'Paulo Henrique Marcelino Batista', patientId: '5' },
-      { id: 'pr4', type: 'Cardápio Semanal', date: '18/06/2026', patientName: 'Alessandra De Souza Soares', patientId: '6' },
-      { id: 'pr5', type: 'Cardápio Semanal', date: '12/06/2026', patientName: 'Elisangela Torres Correa', patientId: '4' }
-    ];
-  });
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
 
   // 6. Appointments State
-  const [appointments, setAppointments] = useState<Appointment[]>(() => {
-    const saved = readStorage<Appointment[] | null>('webfit_appointments', null);
-    if (saved) return saved;
-    return [
-      { id: 'ap1', patientId: '1', patientName: 'Alaine Dos Santos Pereira', date: '2025-07-05', time: '10:00', type: 'Presencial', status: 'Realizada' },
-      { id: 'ap2', patientId: '2', patientName: 'Raiza Manuelle Marmo Santos', date: '2025-07-12', time: '14:00', type: 'Presencial', status: 'Realizada' },
-      { id: 'ap3', patientId: '3', patientName: 'Gabriely Martins De Souza', date: '2025-07-20', time: '16:00', type: 'Online', status: 'Realizada' },
-      { id: 'ap4', patientId: '4', patientName: 'Elisangela Torres Correa', date: '2025-08-15', time: '09:00', type: 'Online', status: 'Realizada' },
-      { id: 'ap5', patientId: '1', patientName: 'Alaine Dos Santos Pereira', date: '2026-06-19', time: '11:00', type: 'Presencial', status: 'Realizada' },
-      { id: 'ap6', patientId: '2', patientName: 'Raiza Manuelle Marmo Santos', date: '2026-06-19', time: '10:00', type: 'Presencial', status: 'Realizada' },
-      { id: 'ap7', patientId: '3', patientName: 'Gabriely Martins De Souza', date: '2026-06-19', time: '09:00', type: 'Online', status: 'Realizada' },
-      { id: 'ap8', patientId: '4', patientName: 'Elisangela Torres Correa', date: '2026-06-19', time: '08:00', type: 'Online', status: 'Realizada' },
-      { id: 'ap9', patientId: '5', patientName: 'Paulo Henrique Marcelino Batista', date: '2026-06-18', time: '15:00', type: 'Presencial', status: 'Realizada' },
-      { id: 'ap10', patientId: '6', patientName: 'Alessandra De Souza Soares', date: '2026-06-18', time: '16:30', type: 'Presencial', status: 'Realizada' },
-      { id: 'ap11', patientId: '2', patientName: 'Raiza Manuelle Marmo Santos', date: '2026-06-10', time: '14:00', type: 'Presencial', status: 'Realizada' },
-      { id: 'ap12', patientId: '3', patientName: 'Gabriely Martins De Souza', date: '2026-06-12', time: '11:30', type: 'Online', status: 'Realizada' }
-    ] as Appointment[];
-  });
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
   // 7. Financial Transactions
-  const [financials, setFinancials] = useState<Financial[]>(() => {
-    const saved = readStorage<Financial[] | null>('webfit_financials', null);
-    if (saved) return saved;
-    return [
-      { id: 'f1', patientName: 'Alaine Dos Santos Pereira', date: '19/06/2026', value: 250.00, method: 'PIX', status: 'Pago' },
-      { id: 'f2', patientName: 'Raiza Manuelle Marmo Santos', date: '19/06/2026', value: 300.00, method: 'Cartão', status: 'Pago' },
-      { id: 'f3', patientName: 'Gabriely Martins De Souza', date: '19/06/2026', value: 250.00, method: 'PIX', status: 'Pago' },
-      { id: 'f4', patientName: 'Elisangela Torres Correa', date: '19/06/2026', value: 250.00, method: 'PIX', status: 'Pago' },
-      { id: 'f5', patientName: 'Paulo Henrique Marcelino Batista', date: '18/06/2026', value: 250.00, method: 'Dinheiro', status: 'Pago' },
-      { id: 'f6', patientName: 'Alessandra De Souza Soares', date: '18/06/2026', value: 300.00, method: 'PIX', status: 'Pago' }
-    ] as Financial[];
-  });
+  const [financials, setFinancials] = useState<Financial[]>([]);
 
   // 8. Chat histories
-  const [chats, setChats] = useState<Chat>(() => {
-    const saved = readStorage<Chat | null>('webfit_chats', null);
-    if (saved) return saved;
-    return {
-      '1': [
-        { sender: 'patient', text: 'Olá Dra! Já baixei o app.', time: '19/06/2026 - 11:15' },
-        { sender: 'doctor', text: 'Olá Alaine! Ótimo. Dê uma olhada na sua prescrição semanal e qualquer dúvida me fale.', time: '19/06/2026 - 11:20' }
-      ],
-      '6': [
-        { sender: 'patient', text: 'Dra, enviei a foto do meu almoço no diário.', time: '19/06/2026 - 14:40' },
-        { sender: 'doctor', text: 'Oi Alessandra! Já visualizei nas notificações. O prato ficou excelente e super colorido, parabéns!', time: '19/06/2026 - 14:45' }
-      ]
-    };
-  });
+  const [chats, setChats] = useState<Chat>({});
 
   // 9. Recipes
-  const [recipes, setRecipes] = useState<Recipe[]>(() => {
-    const saved = readStorage<Recipe[] | null>('webfit_recipes', null);
-    if (saved) return saved;
-    return [
-      { id: 'r1', title: 'Panqueca Fit de Banana', ingredients: '1 banana madura, 1 ovo, 2 colheres de sopa de farelo de aveia, canela a gosto.', method: 'Amasse a banana, misture com o ovo e farelo de aveia. Asse em frigideira antiaderente dos dois lados.', calories: 220 },
-      { id: 'r2', title: 'Pão de Queijo de Frigideira', ingredients: '1 ovo, 1 colher de sopa de tapioca, 1 colher de sopa de requeijão light, 1 colher de sopa de queijo ralado.', method: 'Misture bem todos os ingredientes e asse na frigideira untada. Tampe para derreter.', calories: 180 },
-      { id: 'r3', title: 'Suco Verde Antioxidante', ingredients: '2 folhas de couve, suco de 1 limão, 1 rodela de gengibre, 200ml de água de coco.', method: 'Bata tudo no liquidificador com gelo e consuma imediatamente sem coar.', calories: 95 }
-    ];
-  });
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
 
   // 10. My Custom Foods
-  const [myFoods, setMyFoods] = useState<Food[]>(() => {
-    const saved = readStorage<Food[] | null>('webfit_myfoods', null);
-    if (saved) return saved;
-    return [
-      { id: 'fd1', name: 'Iogurte Natural de Ovelha', portion: '100g', calories: 75, protein: 5.5, carbs: 4.0, fat: 3.8 },
-      { id: 'fd2', name: 'Pão de Fermentação Natural (Levain)', portion: '50g (1 fatia)', calories: 130, protein: 4.2, carbs: 26.0, fat: 0.8 },
-      { id: 'fd3', name: 'Whey Protein Isolado Grass-Fed', portion: '30g (1 scoop)', calories: 110, protein: 26.0, carbs: 1.0, fat: 0.2 }
-    ];
-  });
+  const [myFoods, setMyFoods] = useState<Food[]>([]);
 
   // 11. Message Templates
-  const [messageTemplates, setMessageTemplates] = useState<MessageTemplate[]>(() => {
-    const saved = readStorage<MessageTemplate[] | null>('webfit_templates', null);
-    if (saved) return saved;
-    return [
-      { id: 'mt1', title: 'Boas-vindas ao consultório', content: 'Olá {nome}, fico muito feliz em acompanhar você na sua jornada!' },
-      { id: 'mt2', title: 'Lembrete de retorno', content: 'Olá {nome}, espero que esteja indo tudo bem com o plano alimentar!' },
-      { id: 'mt3', title: 'Instruções de pré-consulta', content: 'Olá {nome}, sua consulta está agendada!' }
-    ];
-  });
+  const [messageTemplates, setMessageTemplates] = useState<MessageTemplate[]>([]);
 
   // 12. App Settings Widget Content
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
@@ -306,25 +100,65 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   // 13. Site Creator Content (Marketing)
-  const [siteSettings, setSiteSettings] = useState<SiteSettings>(() => {
-    const saved = readStorage<SiteSettings | null>('webfit_site_settings', null);
-    return saved ?? {
-      title: 'Marina Silva Nutrição Personalizada',
-      bio: 'Nutricionista clínica com foco em emagrecimento saudável, gestantes e nutrição esportiva.',
-      address: 'Av. Paulista, 1000 - São Paulo, SP',
-      phone: '(11) 98765-4321',
-      theme: 'teal'
-    };
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>({
+    title: '',
+    bio: '',
+    address: '',
+    phone: '',
+    theme: 'violet',
   });
+
+  useEffect(() => {
+    setUserProfile((current) => ({
+      ...current,
+      name: String(user?.user_metadata?.display_name ?? user?.email?.split('@')[0] ?? 'Profissional'),
+      email: user?.email ?? '',
+      avatar: '',
+    }));
+  }, [user]);
+
+  useEffect(() => {
+    if (activeClinic) {
+      setSiteSettings((current) => current.title ? current : { ...current, title: activeClinic.name });
+    }
+  }, [activeClinic]);
+
+  const refreshClinicalData = useCallback(async () => {
+    if (!configured || !activeClinic) {
+      setPatients([]);
+      setAppointments([]);
+      setDataLoading(false);
+      setDataError(null);
+      return;
+    }
+
+    setDataLoading(true);
+    setDataError(null);
+    try {
+      const nextPatients = await listPatients(activeClinic.id);
+      const nextAppointments = await listAppointments(activeClinic.id, nextPatients);
+      setPatients(nextPatients);
+      setAppointments(nextAppointments);
+    } catch (cause) {
+      console.error('[WebFit dados clínicos] Falha ao carregar dados', cause);
+      setDataError('Não foi possível carregar pacientes e agendamentos. Tente novamente.');
+    } finally {
+      setDataLoading(false);
+    }
+  }, [activeClinic, configured]);
+
+  useEffect(() => {
+    window.localStorage.removeItem('webfit_patients');
+    window.localStorage.removeItem('webfit_appointments');
+    void refreshClinicalData();
+  }, [refreshClinicalData]);
 
   // ── Persist to localStorage ──────────────────────────────────
   useEffect(() => { writeStorage('webfit_theme', appTheme); }, [appTheme]);
   useEffect(() => { writeStorage('webfit_profile', userProfile); }, [userProfile]);
-  useEffect(() => { writeStorage('webfit_patients', patients); }, [patients]);
   useEffect(() => { writeStorage('webfit_tasks', plannerTasks); }, [plannerTasks]);
   useEffect(() => { writeStorage('webfit_notifications', notifications); }, [notifications]);
   useEffect(() => { writeStorage('webfit_prescriptions', prescriptions); }, [prescriptions]);
-  useEffect(() => { writeStorage('webfit_appointments', appointments); }, [appointments]);
   useEffect(() => { writeStorage('webfit_financials', financials); }, [financials]);
   useEffect(() => { writeStorage('webfit_chats', chats); }, [chats]);
   useEffect(() => { writeStorage('webfit_recipes', recipes); }, [recipes]);
@@ -339,41 +173,35 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     setUserProfile(prev => ({ ...prev, isBlack: !prev.isBlack }));
   };
 
-  const addPatient = (patientData: Omit<Patient, 'id' | 'lastModified' | 'status'>): Patient => {
-    const id = Date.now().toString();
-    const now = new Date();
-    const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} - ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+  const requireClinicalIdentity = () => {
+    if (!activeClinic || !user) throw new Error('Sua sessão clínica não está pronta. Entre novamente e selecione a clínica.');
+    return { clinicId: activeClinic.id, userId: user.id };
+  };
 
-    const newPatient: Patient = {
-      id,
-      name: patientData.name,
-      nickname: patientData.nickname || patientData.name.split(' ')[0],
-      cpf: patientData.cpf || 'Não informado',
-      phone: patientData.phone || 'Não informado',
-      email: patientData.email || 'Não informado',
-      gender: patientData.gender || 'Feminino',
-      birthDate: patientData.birthDate || '',
-      tags: patientData.tags || [],
-      lastModified: formattedDate,
-      notes: patientData.notes || '',
-      status: 'Ativo'
-    };
-
-    setPatients(prev => [newPatient, ...prev]);
+  const addPatient = async (patientData: Omit<Patient, 'id' | 'lastModified' | 'status'>): Promise<Patient> => {
+    const { clinicId, userId } = requireClinicalIdentity();
+    setDataError(null);
+    const newPatient = await createPatient(clinicId, userId, patientData);
+    setPatients((current) => [newPatient, ...current]);
     return newPatient;
   };
 
-  const updatePatient = (updated: Partial<Patient> & { id: string }) => {
-    const now = new Date();
-    const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} - ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-
-    setPatients(prev => prev.map(p => {
-      if (p.id === updated.id) return { ...p, ...updated, lastModified: formattedDate };
-      return p;
-    }));
+  const updatePatient = async (updated: Partial<Patient> & { id: string }): Promise<void> => {
+    const { clinicId } = requireClinicalIdentity();
+    setDataError(null);
+    const savedPatient = await updatePatientRecord(clinicId, updated);
+    setPatients((current) => current.map((patient) => patient.id === savedPatient.id ? savedPatient : patient));
+    setAppointments((current) => current.map((appointment) => (
+      appointment.patientId === savedPatient.id
+        ? { ...appointment, patientName: savedPatient.name }
+        : appointment
+    )));
   };
 
-  const deletePatient = (id: string) => {
+  const deletePatient = async (id: string): Promise<void> => {
+    const { clinicId } = requireClinicalIdentity();
+    setDataError(null);
+    await deletePatientRecord(clinicId, id);
     setPatients(prev => prev.filter(p => p.id !== id));
     setAppointments(prev => prev.filter(ap => ap.patientId !== id));
     setPrescriptions(prev => prev.filter(prescription => prescription.patientId !== id));
@@ -412,27 +240,24 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     setPrescriptions(prev => [newPrescription, ...prev]);
-    updatePatient({ id: patientId });
+    void updatePatient({ id: patientId }).catch((cause) => {
+      console.error('[WebFit paciente] Falha ao atualizar modificação', cause);
+    });
   };
 
-  const addAppointment = (appointmentData: Omit<Appointment, 'id' | 'patientName' | 'status'>) => {
+  const addAppointment = async (appointmentData: Omit<Appointment, 'id' | 'patientName' | 'status'>): Promise<void> => {
     const patient = patients.find(p => p.id === appointmentData.patientId);
-    if (!patient) return;
-
-    const newAppointment: Appointment = {
-      id: Date.now().toString(),
-      patientId: patient.id,
-      patientName: patient.name,
-      date: appointmentData.date,
-      time: appointmentData.time,
-      type: appointmentData.type || 'Presencial',
-      status: 'Confirmada'
-    };
-
+    if (!patient) throw new Error('Paciente não encontrado. Atualize a página e tente novamente.');
+    const { clinicId, userId } = requireClinicalIdentity();
+    setDataError(null);
+    const newAppointment = await createAppointment(clinicId, userId, appointmentData, patient.name);
     setAppointments(prev => [newAppointment, ...prev]);
   };
 
-  const cancelAppointment = (appointmentId: string) => {
+  const cancelAppointment = async (appointmentId: string): Promise<void> => {
+    const { clinicId } = requireClinicalIdentity();
+    setDataError(null);
+    await cancelAppointmentRecord(clinicId, appointmentId);
     setAppointments(prev => prev.map(ap => ap.id === appointmentId ? { ...ap, status: 'Cancelada' } : ap));
   };
 
@@ -480,7 +305,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       patientName: patient.name,
       timestamp: timestampStr,
       action: 'registrou uma foto no diário alimentar.',
-      mealPhoto: imageUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=120&auto=format&fit=crop&q=80',
+      mealPhoto: imageUrl,
       mealName: mealName || 'Refeição registrada',
       read: false
     };
@@ -501,7 +326,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       triggerFinancialsCreate, setTriggerFinancialsCreate,
       selectedPatientId, setSelectedPatientId,
       userProfile, setUserProfile,
-      patients, addPatient, updatePatient, deletePatient,
+      patients, dataLoading, dataError, refreshClinicalData, addPatient, updatePatient, deletePatient,
       plannerTasks, addPlannerTask, togglePlannerTask,
       notifications, markNotificationRead, simulateMealUpload,
       prescriptions, addPrescription,

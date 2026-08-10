@@ -36,12 +36,8 @@ const ToolsPanel: React.FC = () => {
     return `${mins}:${secs}`;
   };
 
-  // MoveHealth mock data
-  const moveHealthData: MoveHealthEntry[] = [
-    { date: '19/06', steps: 10430, kcal: 450, activity: 'Corrida na Esteira' },
-    { date: '18/06', steps: 8520, kcal: 320, activity: 'Caminhada ao Ar Livre' },
-    { date: '17/06', steps: 12100, kcal: 510, activity: 'Treino de Pernas (Musculação)' }
-  ];
+  const moveHealthData: MoveHealthEntry[] = [];
+  const connectedPatient = appointments.find((appointment) => appointment.status !== 'Cancelada')?.patientName;
 
   return (
     <div className="main-content">
@@ -95,7 +91,7 @@ const ToolsPanel: React.FC = () => {
                     <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'var(--bg-card)', border: '2px solid var(--primary-teal)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', marginBottom: '12px', fontWeight: 'bold' }}>
                       P
                     </div>
-                    <span style={{ fontWeight: '600' }}>Paciente Conectado (Alaine)</span>
+                    <span style={{ fontWeight: '600' }}>{connectedPatient ?? 'Nenhum paciente selecionado'}</span>
                     <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>Transmissão Ativa • HD</span>
                   </div>
 
@@ -169,6 +165,7 @@ const ToolsPanel: React.FC = () => {
                 </p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {moveHealthData.length === 0 && <div className="empty-state"><strong>Nenhuma atividade sincronizada.</strong><span>Conecte uma fonte de saúde para visualizar os dados.</span></div>}
                   {moveHealthData.map((day, idx) => (
                     <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.15)', padding: '14px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.02)' }}>
                       <div>
