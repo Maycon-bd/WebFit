@@ -29,6 +29,7 @@ export interface Appointment {
 
 export interface Financial {
   id: string;
+  patientId?: string;
   patientName: string;
   date: string;
   value: number;
@@ -222,7 +223,7 @@ export interface AppContextType {
 
   // Financials
   financials: Financial[];
-  addTransaction: (patientId: string, value: number, method: string) => void;
+  addTransaction: (patientId: string, value: number, method: string, customClientName?: string) => void;
 
   // Chat
   chats: Chat;

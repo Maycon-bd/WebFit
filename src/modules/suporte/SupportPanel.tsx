@@ -12,7 +12,7 @@ const SupportPanel: React.FC = () => {
 
   const faqs: Faq[] = [
     { q: 'Como convido meu paciente para o aplicativo?', a: 'Ao cadastrar o paciente, ele receberá um e-mail de convite com as credenciais. Certifique-se de preencher o celular e e-mail dele corretos na ficha.' },
-    { q: 'Como ativo o plano WebDiet Black?', a: 'Você pode clicar no banner dourado no topo do seu painel a qualquer momento para alternar sua assinatura para o plano Black e liberar recursos exclusivos.' },
+    { q: 'Como ativo o plano WebFit Pro?', a: 'A assinatura Pro libera recursos avançados de acompanhamento, automações e integrações. O gerenciamento ficará disponível na área da conta.' },
     { q: 'É seguro armazenar dados dos pacientes aqui?', a: 'Sim. Seus dados estão em conformidade com as diretrizes de privacidade de dados médicos (LGPD), sendo armazenados com criptografia ponta a ponta.' }
   ];
 

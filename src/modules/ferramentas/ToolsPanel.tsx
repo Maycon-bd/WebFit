@@ -24,8 +24,6 @@ const ToolsPanel: React.FC = () => {
       interval = setInterval(() => {
         setTimer(prev => prev + 1);
       }, 1000);
-    } else {
-      setTimer(0);
     }
     return () => {
       if (interval) clearInterval(interval);
@@ -62,7 +60,7 @@ const ToolsPanel: React.FC = () => {
             onClick={() => setActiveSubTab('movehealth')}
             style={{ padding: '6px 12px', fontSize: '12px' }}
           >
-            MoveHealth (Black)
+            MoveHealth Pro
           </button>
           <button 
             className={`tab-btn ${activeSubTab === 'estatisticas' ? 'active' : ''}`}
@@ -119,7 +117,10 @@ const ToolsPanel: React.FC = () => {
                   <button 
                     className="btn-teal" 
                     style={{ width: 'auto', backgroundColor: 'var(--color-danger)' }}
-                    onClick={() => setCallActive(false)}
+                    onClick={() => {
+                      setCallActive(false);
+                      setTimer(0);
+                    }}
                   >
                     Encerrar Chamada
                   </button>
@@ -147,22 +148,22 @@ const ToolsPanel: React.FC = () => {
         {activeSubTab === 'movehealth' && (
           <div>
             Monitore em tempo real os passos, calorias queimadas e atividades físicas registradas nos smartwatches 
-            e celulares dos seus pacientes! Upgrade opcional para o plano **WebDiet Black**.
+            e celulares dos seus pacientes. Recurso disponível no plano WebFit Pro.
             {!userProfile.isBlack ? (
               <div className="black-lock-screen">
                 <span style={{ fontSize: '40px', marginBottom: '12px' }}>🔒</span>
-                <div className="lock-title">MoveHealth - Integração de Exercício Black</div>
+                <div className="lock-title">MoveHealth — Integração WebFit Pro</div>
                 <p className="lock-desc">
                   Monitore em tempo real os passos, calorias queimadas e atividades físicas registradas nos smartwatches 
-                  e celulares dos seus pacientes! Upgrade opcional para o plano **WebDiet Black**.
+                  e celulares dos seus pacientes. Faça o upgrade para o plano WebFit Pro.
                 </p>
                 <button className="btn-teal" style={{ width: 'auto' }} onClick={toggleBlackStatus}>
-                  Desbloquear MoveHealth (Black)
+                  Conhecer o WebFit Pro
                 </button>
               </div>
             ) : (
               <div>
-                <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>MoveHealth - Integração Fitness (Black)</h2>
+                <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>MoveHealth — Integração de movimento</h2>
                 <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>
                   Exibição de logs agregados de atividades físicas recebidos via Apple Health / Google Fit.
                 </p>
@@ -192,12 +193,12 @@ const ToolsPanel: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
               <div className="card" style={{ backgroundColor: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.03)', padding: '16px' }}>
                 <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Fidelização Média</span>
-                <h3 style={{ fontSize: '24px', margin: '4px 0', fontFamily: 'Outfit' }}>92%</h3>
+                <h3 style={{ fontSize: '24px', margin: '4px 0', fontFamily: 'Manrope' }}>92%</h3>
                 <span style={{ fontSize: '10.5px', color: 'var(--color-success)' }}>Retorno frequente de pacientes</span>
               </div>
               <div className="card" style={{ backgroundColor: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.03)', padding: '16px' }}>
                 <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Consultas Realizadas</span>
-                <h3 style={{ fontSize: '24px', margin: '4px 0', fontFamily: 'Outfit' }}>{appointments.length}</h3>
+                <h3 style={{ fontSize: '24px', margin: '4px 0', fontFamily: 'Manrope' }}>{appointments.length}</h3>
                 <span style={{ fontSize: '10.5px', color: 'var(--text-muted)' }}>Histórico completo de atendimentos</span>
               </div>
             </div>

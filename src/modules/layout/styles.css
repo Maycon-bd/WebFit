@@ -12,6 +12,35 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
+/* WebFit Care OS navigation */
+.navbar {
+  min-height: var(--navbar-height);
+  height: auto;
+  padding: 10px 28px;
+  border-bottom: 1px solid var(--line-subtle);
+  background: var(--bg-navbar);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 8px 30px rgba(35, 37, 64, 0.05);
+}
+
+.nav-left { gap: 34px; }
+.nav-logo { gap: 11px; font-family: 'Manrope', sans-serif; font-size: 18px; letter-spacing: -.035em; }
+.nav-logo > span:last-child { display: flex; flex-direction: column; }
+.nav-logo small { margin-top: 2px; color: var(--text-muted); font-size: 8px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.nav-brand-mark { width: 36px; height: 36px; flex: 0 0 36px; border-radius: 12px; }
+.nav-links { gap: 3px; padding: 4px; border: 1px solid var(--line-subtle); border-radius: 14px; background: var(--bg-soft); }
+.nav-btn { padding: 8px 11px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+.nav-btn:hover, .nav-btn.active { color: var(--primary-teal); background: var(--bg-card); box-shadow: 0 3px 12px rgba(40,42,70,.06); }
+.icon-btn { border: 1px solid var(--line-subtle); border-radius: 11px; background: var(--bg-card); }
+.user-avatar-btn { border-color: var(--primary-teal-border); border-radius: 12px; box-shadow: none; }
+.connection-chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid var(--line-subtle); border-radius: 999px; background: var(--bg-card); color: var(--text-secondary); font-size: 10px; font-weight: 800; }
+.connection-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-warning); }
+.connection-chip.connected i { background: var(--color-success); box-shadow: 0 0 0 4px var(--color-success-bg); }
+.dropdown-menu, .notifications-panel, .apps-grid-dropdown { border-color: var(--line-subtle); border-radius: 16px; box-shadow: 0 20px 60px rgba(35,37,64,.16); }
+.notification-card.unread { background: var(--primary-teal-light); }
+
+@media (max-width: 1180px) { .connection-chip { display: none; } }
+
 .nav-left {
   display: flex;
   align-items: center;
@@ -24,7 +53,7 @@
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Manrope', sans-serif;
   font-weight: 800;
   font-size: 20px;
   letter-spacing: 0.5px;
@@ -271,8 +300,14 @@
 }
 
 .notification-card {
+  width: 100%;
   padding: 14px 16px;
+  border: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -498,3 +533,21 @@
   color: #475569;
 }
 
+/* Final identity overrides intentionally follow legacy module styles. */
+.navbar { min-height: var(--navbar-height); height: auto; padding: 10px 28px; border-bottom: 1px solid var(--line-subtle); background: var(--bg-navbar); backdrop-filter: blur(18px) saturate(140%); box-shadow: 0 8px 30px rgba(35,37,64,.05); }
+.nav-left { gap: 34px; }
+.nav-logo { gap: 11px; font-family: 'Manrope', sans-serif; font-size: 18px; letter-spacing: -.035em; }
+.nav-logo > span:last-child { display: flex; flex-direction: column; }
+.nav-logo small { margin-top: 2px; color: var(--text-muted); font-size: 8px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.nav-brand-mark { width: 36px; height: 36px; flex: 0 0 36px; border-radius: 12px; }
+.nav-links { gap: 3px; padding: 4px; border: 1px solid var(--line-subtle); border-radius: 14px; background: var(--bg-soft); }
+.nav-btn { padding: 8px 11px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+.nav-btn:hover, .nav-btn.active { color: var(--primary-teal); background: var(--bg-card); box-shadow: 0 3px 12px rgba(40,42,70,.06); }
+.icon-btn { border: 1px solid var(--line-subtle); border-radius: 11px; background: var(--bg-card); }
+.user-avatar-btn { border-color: var(--primary-teal-border); border-radius: 12px; box-shadow: none; }
+.connection-chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid var(--line-subtle); border-radius: 999px; background: var(--bg-card); color: var(--text-secondary); font-size: 10px; font-weight: 800; }
+.connection-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-warning); }
+.connection-chip.connected i { background: var(--color-success); box-shadow: 0 0 0 4px var(--color-success-bg); }
+.dropdown-menu, .notifications-panel, .apps-grid-dropdown { border-color: var(--line-subtle); border-radius: 16px; box-shadow: 0 20px 60px rgba(35,37,64,.16); }
+.notification-card.unread { background: var(--primary-teal-light); }
+@media (max-width: 1180px) { .connection-chip { display: none; } }

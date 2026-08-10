@@ -26,9 +26,9 @@ Este documento descreve as regras de negócio para a gestão de fichas de pacien
 - O sistema exibe o histórico de respostas enviadas pelos pacientes para auxiliar o nutricionista na elaboração do diagnóstico clínico.
 
 ### D. iMetas (Controle de Planos)
-- **Controle de Acesso**: O quadro interativo de metas de hábitos é um recurso exclusivo do plano **WebDiet Black**.
+- **Controle de Acesso**: O quadro interativo de metas de hábitos faz parte do plano **WebFit Pro**.
 - **Acesso Bloqueado**: Se o profissional estiver no plano padrão, exibe-se uma tela bloqueada e um atalho de conversão/upgrade.
-- **Acesso Desbloqueado**: Quando o plano Black está ativo, o profissional pode adicionar novas metas personalizadas de hábitos e marcar conclusões em tempo real.
+- **Acesso Desbloqueado**: Quando o plano Pro está ativo, o profissional pode adicionar metas personalizadas e acompanhar conclusões.
 
 ### E. Diário Alimentar do Paciente
 - Exibe a linha do tempo de fotos de refeições enviadas pelo paciente selecionado.

@@ -3,6 +3,7 @@ import { AppContext } from '../../context/AppContext';
 import DropdownMenu from './DropdownMenu';
 import NotificationPanel from './NotificationPanel';
 import type { AppPage } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 import './styles.css';
 
 interface NavbarProps {
@@ -14,6 +15,7 @@ type DropdownName = 'consultorio' | 'estudos';
 
 const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
   const {
+    activePage,
     setActivePage,
     notifications,
     userProfile,
@@ -23,6 +25,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
     setTriggerFinancialsCreate,
     addPlannerTask,
   } = useContext(AppContext);
+  const { configured, session, signOut } = useAuth();
 
   const [openDropdown, setOpenDropdown] = useState<DropdownName | null>(null);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -48,6 +51,11 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
     } else if (action === 'finance') {
       setTriggerFinancialsCreate(true);
       setActivePage('financeiro');
+    } else if (action === 'questionnaire') {
+      setActivePage('pacientes');
+      alert('Selecione um paciente para criar ou enviar um questionário.');
+    } else if (action === 'cloud') {
+      alert('O armazenamento em nuvem será habilitado quando o backend estiver conectado.');
     }
   };
 
@@ -93,12 +101,18 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
   return (
     <header className="navbar">
       <div className="nav-left">
-        <div className="nav-logo" onClick={() => handlePageSelect('dashboard')}>
-          <div className="logo-icon">
-            <div className="logo-circle"></div>
-            <div className="logo-center"></div>
-          </div>
-          <span>WebFit</span>
+        <div
+          className="nav-logo"
+          role="button"
+          tabIndex={0}
+          aria-label="Ir para o dashboard"
+          onClick={() => handlePageSelect('dashboard')}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') handlePageSelect('dashboard');
+          }}
+        >
+          <span className="brand-mark nav-brand-mark">W</span>
+          <span>WebFit <small>Care OS</small></span>
         </div>
 
         <button
@@ -113,8 +127,9 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
           {/* Consultorio Dropdown */}
           <div className="nav-item-container">
             <button
-              className={`nav-btn ${openDropdown === 'consultorio' ? 'open' : ''}`}
+              className={`nav-btn ${openDropdown === 'consultorio' ? 'open' : ''} ${['pacientes', 'agendamentos', 'diario', 'financeiro'].includes(activePage) ? 'active' : ''}`}
               onClick={() => toggleDropdown('consultorio')}
+              aria-expanded={openDropdown === 'consultorio'}
             >
               Consultório <span className="chevron"></span>
             </button>
@@ -128,8 +143,9 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
           {/* Estudos Dropdown */}
           <div className="nav-item-container">
             <button
-              className={`nav-btn ${openDropdown === 'estudos' ? 'open' : ''}`}
+              className={`nav-btn ${openDropdown === 'estudos' ? 'open' : ''} ${activePage === 'estudos' ? 'active' : ''}`}
               onClick={() => toggleDropdown('estudos')}
+              aria-expanded={openDropdown === 'estudos'}
             >
               Estudos <span className="chevron"></span>
             </button>
@@ -139,10 +155,18 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
               onClose={() => setOpenDropdown(null)}
             />
           </div>
+
+          <button className={`nav-btn ${activePage === 'marketing' ? 'active' : ''}`} onClick={() => handlePageSelect('marketing')}>Marketing</button>
+          <button className={`nav-btn ${activePage === 'ferramentas' ? 'active' : ''}`} onClick={() => handlePageSelect('ferramentas')}>Ferramentas</button>
+          <button className={`nav-btn ${activePage === 'chat' ? 'active' : ''}`} onClick={() => handlePageSelect('chat')}>Chat</button>
+          <button className={`nav-btn ${activePage === 'suporte' ? 'active' : ''}`} onClick={() => handlePageSelect('suporte')}>Suporte</button>
         </nav>
       </div>
 
       <div className="nav-right">
+        <span className={`connection-chip ${configured ? 'connected' : 'demo'}`} title={configured ? 'Dados conectados ao Supabase' : 'Configure o .env para conectar o Supabase'}>
+          <i></i>{configured ? 'Nuvem' : 'Demo local'}
+        </span>
         {/* WhatsApp Icon */}
         <button
           className="icon-btn whatsapp-circle"
@@ -151,6 +175,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
             window.open(`https://wa.me/${num}`, '_blank');
           }}
           title="Falar no WhatsApp"
+          aria-label="Falar no WhatsApp"
         >
           <svg style={{ width: '20px', height: '20px' }} viewBox="0 0 24 24" fill="currentColor">
             <path d="M12.004 2c-5.518 0-9.996 4.477-9.996 9.995 0 1.765.459 3.487 1.33 5.004L2 22l5.127-1.345c1.47.8 3.119 1.22 4.873 1.22 5.518 0 9.997-4.477 9.997-9.995 0-5.518-4.479-9.995-9.997-9.995zm4.846 13.992c-.22.613-1.077 1.144-1.639 1.19-.505.042-1.162.062-1.872-.164-.452-.143-1.012-.348-1.724-.655-3.033-1.31-5.002-4.385-5.155-4.588-.153-.203-1.246-1.657-1.246-3.16 0-1.502.788-2.24 1.072-2.54.283-.3.619-.374.825-.374.207 0 .414.002.595.01.187.009.439-.073.687.525.253.61.865 2.106.94 2.259.075.152.125.33.025.53-.1.2-.15.33-.3.504-.15.176-.316.39-.452.523-.153.15-.314.313-.135.62.18.307.8 1.303 1.714 2.117.915.814 1.688 1.066 1.993 1.22.306.152.484.127.665-.078.18-.203.784-.913.996-1.224.212-.31.424-.26.714-.152.29.11 1.842.87 2.158 1.028.318.158.528.236.604.368.077.132.077.766-.143 1.38z" />
@@ -166,6 +191,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
               setOpenDropdown(null);
             }}
             title="Notificações do Diário"
+            aria-label={`Notificações do diário: ${unreadNotificationsCount} não lidas`}
           >
             <svg style={{ width: '20px', height: '20px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -188,6 +214,8 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
               setOpenDropdown(null);
             }}
             title="Atalhos Rápidos de Ações"
+            aria-label="Abrir atalhos rápidos"
+            aria-expanded={isGridOpen}
           >
             <svg style={{ width: '20px', height: '20px' }} viewBox="0 0 24 24" fill="currentColor">
               <path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z" />
@@ -261,6 +289,11 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
         >
           <img src={userProfile.avatar} alt="Avatar do Nutricionista" />
         </button>
+        {configured && session && (
+          <button className="icon-btn" onClick={() => void signOut()} title="Sair da conta" aria-label="Sair da conta">
+            ↗
+          </button>
+        )}
       </div>
     </header>
   );

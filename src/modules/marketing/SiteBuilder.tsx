@@ -100,8 +100,8 @@ const SiteBuilder: React.FC = () => {
                 value={siteSettings.theme} 
                 onChange={(e) => handleChange('theme', e.target.value)}
               >
-                <option value="teal">Verde Teal (Padrão)</option>
-                <option value="gold">Dourado Black</option>
+                <option value="teal">Violeta mineral</option>
+                <option value="gold">Coral acolhedor</option>
                 <option value="purple">Roxo Moderno</option>
               </select>
             </div>

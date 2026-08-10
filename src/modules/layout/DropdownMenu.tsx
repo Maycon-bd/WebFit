@@ -32,11 +32,12 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ options, isOpen, onClose })
   if (!isOpen) return null;
 
   return (
-    <div className="dropdown-menu" ref={dropdownRef}>
+    <div className="dropdown-menu" ref={dropdownRef} role="menu">
       {options.map((option, idx) => (
         <button
           key={idx}
           className="dropdown-item"
+          role="menuitem"
           onClick={() => {
             option.onClick();
             onClose();

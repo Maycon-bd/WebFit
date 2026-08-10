@@ -7,8 +7,16 @@ import Scheduler from './modules/agendamentos/Scheduler';
 import FoodDiary from './modules/diario/FoodDiary';
 import Financials from './modules/financeiro/Financials';
 import StudiesPanel from './modules/estudos/StudiesPanel';
+import MarketingPanel from './modules/marketing/MarketingPanel';
+import ToolsPanel from './modules/ferramentas/ToolsPanel';
+import ChatWindow from './modules/chat/ChatWindow';
+import SupportPanel from './modules/suporte/SupportPanel';
 import Modal from './modules/shared/Modal';
 import type { AppTheme } from './types';
+import StorageStatus from './components/StorageStatus';
+import AuthGate from './components/AuthGate';
+import { AuthProvider } from './context/AuthContext';
+import { WorkspaceProvider } from './context/WorkspaceContext';
 
 import './styles/global.css';
 
@@ -69,6 +77,7 @@ const InnerApp: React.FC = () => {
 
   return (
     <div className={`app-container theme-${appTheme}`}>
+      <StorageStatus />
       <Navbar onOpenProfile={handleOpenProfileModal} />
 
       <main>
@@ -80,6 +89,10 @@ const InnerApp: React.FC = () => {
         {activePage === 'diario' && <FoodDiary />}
         {activePage === 'financeiro' && <Financials />}
         {activePage === 'estudos' && <StudiesPanel />}
+        {activePage === 'marketing' && <MarketingPanel />}
+        {activePage === 'ferramentas' && <ToolsPanel />}
+        {activePage === 'chat' && <ChatWindow />}
+        {activePage === 'suporte' && <SupportPanel />}
       </main>
 
       {/* Profile Modal */}
@@ -137,7 +150,7 @@ const InnerApp: React.FC = () => {
                 style={{ ...themeButtonStyle('oled'), backgroundColor: '#000000', color: '#ffffff' }}
               >
                 <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#000000', border: '1px solid #ffffff' }}></span>
-                OLED Black
+                OLED
               </button>
               <button
                 type="button"
@@ -164,9 +177,9 @@ const InnerApp: React.FC = () => {
           </div>
 
           <div style={{ padding: '12px', backgroundColor: 'var(--primary-teal-light)', borderRadius: '6px', border: '1px solid var(--primary-teal-border)', fontSize: '13px' }}>
-            <strong>Plano Atual:</strong> {userProfile.isBlack ? '👑 WebDiet Black' : 'WebDiet Padrão'}
+            <strong>Plano atual:</strong> {userProfile.isBlack ? 'WebFit Pro' : 'WebFit Essencial'}
             <div style={{ color: 'var(--text-secondary)', fontSize: '11.5px', marginTop: '4px' }}>
-              Para assinar ou gerenciar o plano Black, utilize o banner principal dourado do Dashboard.
+              Recursos avançados podem ser gerenciados na área de assinatura.
             </div>
           </div>
           <button type="submit" className="btn-teal" style={{ marginTop: '10px' }}>
@@ -180,9 +193,15 @@ const InnerApp: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <AppProvider>
-      <InnerApp />
-    </AppProvider>
+    <AuthProvider>
+      <WorkspaceProvider>
+        <AuthGate>
+          <AppProvider>
+            <InnerApp />
+          </AppProvider>
+        </AuthGate>
+      </WorkspaceProvider>
+    </AuthProvider>
   );
 };
 

@@ -12,7 +12,7 @@ const Scheduler: React.FC = () => {
   } = useContext(AppContext);
   
   const [selectedPatientId, setSelectedPatientId] = useState(patients[0]?.id || '');
-  const [date, setDate] = useState('2026-06-19');
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState('09:00');
   const [type, setType] = useState<'Presencial' | 'Online'>('Presencial');
   const [isAdding, setIsAdding] = useState(false);
@@ -155,12 +155,12 @@ const Scheduler: React.FC = () => {
                           </span>
                         </td>
                         <td style={{ padding: '12px 8px' }}>
-                          <span style={{ color: ap.status === 'Realizada' ? 'var(--color-success)' : 'var(--color-warning)' }}>
+                          <span style={{ color: ap.status === 'Realizada' ? 'var(--color-success)' : ap.status === 'Cancelada' ? 'var(--color-danger)' : 'var(--color-warning)' }}>
                             {ap.status}
                           </span>
                         </td>
                         <td style={{ padding: '12px 8px', textAlign: 'right' }}>
-                          <button 
+                          {ap.status !== 'Cancelada' && <button
                             style={{ 
                               background: 'none', 
                               border: 'none', 
@@ -176,7 +176,7 @@ const Scheduler: React.FC = () => {
                             }}
                           >
                             Desmarcar
-                          </button>
+                          </button>}
                         </td>
                       </tr>
                     );

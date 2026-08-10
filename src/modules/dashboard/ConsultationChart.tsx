@@ -1,11 +1,8 @@
 import React, { useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
+import { getRollingMonths, type MonthReference } from '../../utils/dates';
 
-interface MonthEntry {
-  label: string;
-  month: number;
-  year: number;
-}
+type MonthEntry = MonthReference;
 
 interface ChartDataEntry extends MonthEntry {
   count: number;
@@ -14,30 +11,7 @@ interface ChartDataEntry extends MonthEntry {
 const ConsultationChart: React.FC = () => {
   const { appointments, setActivePage } = useContext(AppContext);
 
-  const getMonthsList = (): MonthEntry[] => {
-    const list: MonthEntry[] = [];
-    const monthsNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-
-    let startYear = 2025;
-    let startMonthIdx = 5; // June (0-indexed)
-
-    for (let i = 0; i < 13; i++) {
-      list.push({
-        label: `${monthsNames[startMonthIdx]}/${startYear.toString().slice(-2)}`,
-        month: startMonthIdx + 1,
-        year: startYear,
-      });
-
-      startMonthIdx++;
-      if (startMonthIdx > 11) {
-        startMonthIdx = 0;
-        startYear++;
-      }
-    }
-    return list;
-  };
-
-  const months = getMonthsList();
+  const months: MonthEntry[] = getRollingMonths();
 
   const chartData: ChartDataEntry[] = months.map(m => {
     const count = appointments.filter(ap => {

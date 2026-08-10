@@ -38,7 +38,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="notifications-panel" ref={panelRef}>
+    <div className="notifications-panel" ref={panelRef} aria-label="Notificações recentes">
       <div className="notifications-header">
         <h3>Notificações</h3>
         {unreadCount > 0 && (
@@ -52,7 +52,8 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
           <div className="noti-empty">Nenhuma notificação recente.</div>
         ) : (
           notifications.map((noti) => (
-            <div
+            <button
+              type="button"
               key={noti.id}
               className={`notification-card ${!noti.read ? 'unread' : ''}`}
               onClick={() => handleNotificationClick(noti)}
@@ -71,7 +72,7 @@ const NotificationPanel: React.FC<NotificationPanelProps> = ({ isOpen, onClose }
                   <img src={noti.mealPhoto} alt="Refeição" />
                 </div>
               )}
-            </div>
+            </button>
           ))
         )}
       </div>

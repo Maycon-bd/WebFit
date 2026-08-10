@@ -31,8 +31,12 @@ const Financials: React.FC = () => {
       return;
     }
     
-    const numericValue = parseFloat(value) || 0;
-    addTransaction(selectedPatientId, numericValue, method);
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue) || numericValue <= 0) {
+      alert('Informe um valor maior que zero.');
+      return;
+    }
+    addTransaction(selectedPatientId, numericValue, method, customClientName.trim());
     alert('Transação financeira registrada!');
     setCustomClientName('');
     setIsAdding(false);
@@ -53,7 +57,7 @@ const Financials: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '24px' }}>
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderLeft: '4px solid var(--color-success)' }}>
           <span style={{ fontSize: '12.5px', color: 'var(--text-secondary)', fontWeight: '500' }}>Receita Bruta Acumulada</span>
-          <h2 style={{ fontSize: '28px', color: 'var(--color-success)', fontFamily: 'Outfit' }}>
+          <h2 style={{ fontSize: '28px', color: 'var(--color-success)', fontFamily: 'Manrope' }}>
             R$ {totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </h2>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Valores recebidos a partir de atendimentos</span>
@@ -61,7 +65,7 @@ const Financials: React.FC = () => {
 
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderLeft: '4px solid var(--primary-teal)' }}>
           <span style={{ fontSize: '12.5px', color: 'var(--text-secondary)', fontWeight: '500' }}>Atendimentos Registrados</span>
-          <h2 style={{ fontSize: '28px', color: 'var(--text-teal)', fontFamily: 'Outfit' }}>
+          <h2 style={{ fontSize: '28px', color: 'var(--text-teal)', fontFamily: 'Manrope' }}>
             {financials.length}
           </h2>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Consultas pagas no período</span>

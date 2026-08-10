@@ -11,5 +11,5 @@ Este documento regulamenta o suporte técnico e a central de autoajuda aos profi
 ---
 
 ## 2. Central de Autoajuda (FAQs)
-- Exibe de forma direta respostas rápidas para dúvidas recorrentes sobre o sistema, tais como convites ao app do paciente, ativação da assinatura WebDiet Black e termos de privacidade (LGPD).
+- Exibe respostas rápidas sobre convites ao app do paciente, assinatura WebFit Pro e privacidade.
 - Os logs de FAQ são mantidos estáticos no módulo local para fácil acesso sem necessidade de requisições de rede.

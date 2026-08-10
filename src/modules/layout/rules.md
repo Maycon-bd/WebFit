@@ -5,7 +5,7 @@ Este documento descreve o funcionamento do cabeçalho de navegação (`Navbar`),
 ---
 
 ## 1. Descrição Geral do Módulo
-A barra de navegação superior (`Navbar`) é um elemento fixo presente em todas as visualizações do sistema. Ela fornece atalhos de acesso a todos os módulos, monitora interações em tempo real e permite que o usuário gerencie seu perfil e ative recursos do plano **WebDiet Black**.
+A barra de navegação superior (`Navbar`) é um elemento fixo presente em todas as visualizações. Ela fornece atalhos, estado da conexão, notificações e acesso ao perfil profissional.
 
 ---
 
@@ -24,14 +24,14 @@ O menu é dividido em três áreas principais:
    - **WhatsApp**: Abre um canal de atendimento com o número cadastrado no perfil do profissional.
    - **Badge "20" (Simulador)**: Permite simular interações rápidas de pacientes no banco de dados para testes visuais rápidos das notificações e atualizações.
    - **Sino (Notificações)**: Exibe em tempo real postagens de fotos de refeições enviadas pelos pacientes.
-   - **Avatar com borda dourada**: Abre o modal de edição de perfil profissional e controle de plano Black.
+   - **Avatar profissional**: abre o modal de edição de perfil e assinatura.
 
 ---
 
 ## 3. Regras de Notificação (Diário Alimentar)
 O sistema de notificações monitora uploads de refeições feitas pelos pacientes.
 - **Formato**: Cada item exibe o nome do paciente, ação executada ("registrou uma foto no diário alimentar"), data/hora da ação e uma miniatura da refeição enviada.
-- **Estado de Leitura**: Notificações não lidas são destacadas com uma tonalidade azul-teal sutil e exibem um ponto vermelho indicador ao lado do ícone do sino na barra superior.
+- **Estado de Leitura**: Notificações não lidas usam a tonalidade violeta da marca e um indicador no sino.
 - **Interação**: Ao clicar em uma notificação:
   1. A notificação é marcada como lida (o indicador vermelho some).
   2. O sistema altera a página ativa para o **Diário Alimentar**.

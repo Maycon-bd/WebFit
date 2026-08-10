@@ -19,6 +19,6 @@ Este documento estabelece as regras de negócio para a ferramenta de comunicaç�
 ---
 
 ## 3. Disparo e Resposta
-- Mensagens enviadas pelo nutricionista são alinhadas à direita da tela na cor verde-teal padrão.
+- Mensagens enviadas pelo nutricionista são alinhadas à direita na cor violeta da identidade WebFit.
 - Mensagens recebidas dos pacientes são alinhadas à esquerda na cor cinza de fundo.
 - Toda interação atualiza o banco de dados local (`chats`) em tempo real no `localStorage`.

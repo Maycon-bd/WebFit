@@ -14,7 +14,7 @@ Este documento descreve as regras de funcionamento dos recursos auxiliares e tel
 ---
 
 ## 2. MoveHealth (Logs de Atividade Smartwatch)
-- **Bloqueio por Plano**: Módulo integrado com sensores vestíveis (smartwatches) de acesso restrito a assinantes do plano **WebDiet Black**.
+- **Bloqueio por Plano**: Módulo integrado com sensores vestíveis disponível no plano **WebFit Pro**.
 - **Visualização de Dados**: Exibe de forma agregada a quantidade de passos, gasto de calorias estimadas (`kcal`) e atividades registradas no dia a dia do paciente, auxiliando na adequação do balanço energético da dieta.
 
 ---

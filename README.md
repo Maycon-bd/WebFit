@@ -1,6 +1,20 @@
 # WebFit - Plataforma Nutricional Completa
 
-O **WebFit** é um sistema completo e de alta fidelidade visual (baseado nos prints do WebDiet) desenvolvido para nutricionistas e profissionais de saúde. A plataforma permite a gestão completa de fichas clínicas de pacientes, agendamento de consultas, monitoramento de diários alimentares, controle financeiro, marketing e fidelização.
+O **WebFit** é um protótipo funcional de alta fidelidade visual desenvolvido para nutricionistas e profissionais de saúde. A plataforma demonstra gestão de fichas clínicas, agendamentos, diários alimentares, controle financeiro, marketing e fidelização.
+
+> **Estado atual:** aplicação híbrida em evolução. A interface pode operar em modo de demonstração local e já possui autenticação, onboarding e fundação de dados preparada para Supabase. Os módulos de negócio ainda estão sendo migrados gradualmente do `localStorage` para o banco.
+
+### Nova fundação Supabase
+
+O projeto já contém a primeira fundação de backend em `supabase/`: configuração local, migration multi-clínica, RLS em todas as tabelas expostas, bucket privado para arquivos clínicos, índices e Realtime para mensagens e notificações. Quando as variáveis Supabase estão presentes, o front habilita autenticação e onboarding de clínica; sem elas, continua em modo de demonstração local.
+
+```bash
+copy .env.example .env
+# preencha VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY
+npm run dev
+```
+
+Use somente a chave publicável (`sb_publishable_...`) no front-end. Chaves secretas ou `service_role` nunca devem ser adicionadas ao `.env` do Vite.
 
 ---
 
@@ -9,7 +23,7 @@ O **WebFit** é um sistema completo e de alta fidelidade visual (baseado nos pri
 Este projeto foi projetado com foco na **facilidade de compreensão por agentes de IA e desenvolvedores para futuras manutenções**. A estrutura do projeto é modular e autocontida:
 - Cada módulo funcional está localizado em sua própria subpasta dentro do diretório `src/modules/`.
 - Cada pasta de módulo contém seu próprio código (`.jsx` ou `.css`) e um arquivo **`rules.md`** específico contendo detalhadamente as regras de negócio que governam aquele componente.
-- O estado global é gerenciado de forma reativa pelo `AppContext`, mantendo o `localStorage` sincronizado de forma transparente para simular um banco de dados real.
+- O estado global é gerenciado pelo `AppContext`. A camada `src/services/storage.ts` mantém o `localStorage` sincronizado, trata conteúdo corrompido e isola o ponto que deverá ser substituído por uma API.
 
 ### Links Diretos para as Regras de Negócio de Cada Módulo:
 1. **Layout e Notificações**: [src/modules/layout/rules.md](file:///d:/MAYCON/PROJETOS/WebFit/src/modules/layout/rules.md)
@@ -43,14 +57,16 @@ d:\MAYCON\PROJETOS\WebFit\
 ├── docs/                             # Documentação textual original do sistema
 ├── prints/                           # Imagens originais para fidelidade de design
 ├── package.json                      # Arquivo de dependências e comandos npm
-├── vite.config.js                    # Configurações do Vite
+├── vite.config.ts                    # Configurações do Vite
 ├── index.html                        # Ponto de entrada do site com fontes e metadados
 ├── README.md                         # Este documento consolidado
 └── src/
-    ├── main.jsx                      # Inicialização do React
-    ├── App.jsx                       # Ponto de entrada do aplicativo (layout + páginas)
+    ├── main.tsx                      # Inicialização do React
+    ├── App.tsx                       # Ponto de entrada do aplicativo (layout + páginas)
     ├── context/
-    │   └── AppContext.jsx            # Provedor de estado global persistente
+    │   └── AppContext.tsx            # Provedor de estado global persistente
+    ├── services/storage.ts           # Adaptador defensivo de persistência local
+    ├── components/                   # Limite de erros e avisos globais
     ├── styles/
     │   ├── variables.css             # Tema escuro e variáveis de CSS
     │   └── global.css                # Estilo global, botões, animações e reset
@@ -62,7 +78,7 @@ d:\MAYCON\PROJETOS\WebFit\
         ├── diario/                   # Linha do tempo de refeições com fotos e avaliações
         ├── financeiro/               # Caixa, faturamentos, TED, Cartão, Dinheiro
         ├── estudos/                  # Cursos, podcast, blog e artigos de pesquisa
-        ├── marketing/                # WebDiet Canvas, criador de site e leads
+        ├── marketing/                # Estúdio de conteúdo, criador de site e leads
         ├── ferramentas/              # Teleconsulta (Videochamada HD) e estatísticas
         ├── chat/                     # Central de mensagens com injeção de templates
         ├── suporte/                  # FAQs e abertura de chamados técnicos
@@ -84,12 +100,37 @@ d:\MAYCON\PROJETOS\WebFit\
    ```
 4. O Vite abrirá automaticamente o navegador no endereço `http://localhost:3000`.
 
+### Validação de qualidade
+
+```bash
+npm run typecheck
+npm run lint
+npm test
+npm run build
+```
+
+Os testes cobrem persistência defensiva, janela móvel de datas, navegação dos módulos e integridade das operações principais do contexto.
+
+### Desenvolvimento Supabase
+
+```bash
+npx supabase start
+npx supabase migration list --local
+npx supabase db reset
+```
+
+Esses comandos exigem Docker. A migration inicial está em `supabase/migrations/` e deve ser validada localmente antes de ser aplicada a um projeto remoto.
+
+## Limite de segurança da versão local
+
+O `localStorage` não deve ser usado como banco definitivo para CPF, prontuários, conversas ou informações financeiras. Para produção, implemente um adaptador remoto no lugar de `src/services/storage.ts`, com autenticação, autorização por usuário, validação no servidor, criptografia em trânsito, auditoria e estratégia de backup. Credenciais e segredos nunca devem ser incluídos no bundle do Vite.
+
 ---
 
 ## 5. Fluxos de Demonstração e Simulação de Interatividade
 
 Para testar a integração dinâmica e comprovar que o sistema não é estático:
 1. **Simulador de Interação (Diário Alimentar)**: Clique na badge numerada **"20"** no canto superior direito do cabeçalho. O sistema simulará o upload de uma refeição aleatória de um paciente. O indicador vermelho acenderá sobre o **Sino**. Clique no Sino de Notificações, clique na refeição gerada e digite um feedback que será automaticamente enviado ao chat do paciente!
-2. **WebDiet Black (iMetas & MoveHealth)**: O sistema inicializa no plano padrão. Clique no banner superior dourado para se tornar um membro **WebDiet Black**. Veja as abas bloqueadas (como *iMetas* na ficha do paciente e *MoveHealth* em Ferramentas) se transformarem em interfaces dinâmicas ativas!
+2. **WebFit Pro (Metas & MoveHealth)**: o sistema inicializa no plano Essencial. Recursos avançados ficam disponíveis ao alternar para o plano Pro nas demonstrações de assinatura.
 3. **Gráfico do Histórico de Consultas**: Vá em *Consultório -> Agendamentos* ou clique em "Agendar Retorno" dentro de um perfil de paciente. Agende uma consulta na data de hoje. Volte ao Dashboard e veja a barra correspondente ao mês de Junho se elevar dinamicamente no gráfico de colunas!
 4. **Site Builder e Mailing de Leads**: Vá em *Marketing -> Criador de site*. Edite os dados do seu consultório e veja o site se atualizar na lateral. Digite um contato no formulário do simulador e veja o lead ser cadastrado instantaneamente em *Mailing captado*.

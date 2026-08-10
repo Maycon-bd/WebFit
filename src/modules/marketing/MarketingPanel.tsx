@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
-import WebDietCanvas from './WebDietCanvas';
+import ContentStudio from './ContentStudio';
 import SiteBuilder from './SiteBuilder';
 import type { MessageTemplate } from '../../types';
 
@@ -43,7 +43,7 @@ const MarketingPanel: React.FC = () => {
             onClick={() => setActiveSubTab('canvas')}
             style={{ padding: '6px 12px', fontSize: '12px' }}
           >
-            WebDiet Canvas
+            Estúdio de conteúdo
           </button>
           <button 
             className={`tab-btn ${activeSubTab === 'site' ? 'active' : ''}`}
@@ -85,7 +85,7 @@ const MarketingPanel: React.FC = () => {
 
       <div className="card">
         {/* WEBDiet CANVAS */}
-        {activeSubTab === 'canvas' && <WebDietCanvas />}
+        {activeSubTab === 'canvas' && <ContentStudio />}
 
         {/* SITE BUILDER & LEADS */}
         {activeSubTab === 'site' && <SiteBuilder />}

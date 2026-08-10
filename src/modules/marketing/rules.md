@@ -4,10 +4,10 @@ Este documento estabelece as regras de negócio associadas às ferramentas de pr
 
 ---
 
-## 1. WebDiet Canvas (Criador de Artes)
-- O WebDiet Canvas é uma ferramenta simplificada para criar peças promocionais ou informativas.
+## 1. Estúdio WebFit (Criador de Conteúdo)
+- O Estúdio WebFit é uma ferramenta simplificada para criar peças promocionais ou informativas.
 - **Opções de Template**:
-  - Dica de Saúde (cor padrão teal)
+  - Dica de saúde (violeta mineral)
   - Receita Culinária (cor padrão dourada)
   - Agendamento de Consultas (cor padrão escura)
 - **Modificações**: O profissional pode alterar o título do post, a descrição, a cor de fundo e a cor do texto. O design responde dinamicamente às edições na pré-visualização.

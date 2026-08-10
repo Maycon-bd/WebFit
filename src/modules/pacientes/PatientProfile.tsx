@@ -334,11 +334,12 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onBack
   const [returnDate, setReturnDate] = useState('2026-07-15');
   const [returnTime, setReturnTime] = useState('14:00');
   const [returnType, setReturnType] = useState<'Presencial' | 'Online'>('Presencial');
+  const [today] = useState(() => new Date());
 
   const calculateAge = (birthDateStr: string) => {
     if (!birthDateStr) return 'Não informada';
     const birthDate = new Date(birthDateStr);
-    const difference = Date.now() - birthDate.getTime();
+    const difference = today.getTime() - birthDate.getTime();
     const ageDate = new Date(difference);
     return Math.abs(ageDate.getUTCFullYear() - 1970) + ' anos';
   };
@@ -705,21 +706,21 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onBack
                       </label>
                     </div>
                     <div className="settings-toggle-row">
-                      <span className="toggle-label">Habilitar acesso ao aplicativo WebDiet</span>
+                      <span className="toggle-label">Habilitar acesso ao aplicativo WebFit</span>
                       <label className="switch-toggle">
                         <input type="checkbox" checked={appAccess} onChange={(e) => setAppAccess(e.target.checked)} />
                         <span className="switch-slider"></span>
                       </label>
                     </div>
                     <div className="settings-toggle-row">
-                      <span className="toggle-label">Habilitar acesso ao aplicativo WebDiet+ para o paciente</span>
+                      <span className="toggle-label">Habilitar recursos avançados no app do paciente</span>
                       <label className="switch-toggle">
                         <input type="checkbox" checked={plusAccess} onChange={(e) => setPlusAccess(e.target.checked)} />
                         <span className="switch-slider"></span>
                       </label>
                     </div>
                     <div className="settings-toggle-row" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '16px', marginTop: '4px' }}>
-                      <span className="toggle-label" style={{ color: 'var(--text-secondary)' }}>Demais ajustes de aplicativo WebDiet</span>
+                      <span className="toggle-label" style={{ color: 'var(--text-secondary)' }}>Demais ajustes do aplicativo WebFit</span>
                       <button className="perfil-config-btn" onClick={() => alert('Configurações adicionais abertas.')}>Configurar</button>
                     </div>
                   </div>
@@ -955,18 +956,18 @@ const PatientProfile: React.FC<PatientProfileProps> = ({ patient, onEdit, onBack
                 {!userProfile.isBlack ? (
                   <div className="black-lock-screen">
                     <span style={{ fontSize: '40px', marginBottom: '12px' }}>🔒</span>
-                    <div className="lock-title">iMetas - Recurso WebDiet Black</div>
+                    <div className="lock-title">Metas avançadas — WebFit Pro</div>
                     <p className="lock-desc">
-                      A definição e acompanhamento gráfico de metas para pacientes é exclusiva para assinantes do **WebDiet Black**. 
+                      A definição e o acompanhamento gráfico de metas fazem parte do plano WebFit Pro.
                       Eleve seus atendimentos com iMetas, MoveHealth e Inteligência Artificial!
                     </p>
                     <button className="btn-teal" style={{ width: 'auto' }} onClick={toggleBlackStatus}>
-                      Experimentar WebDiet Black Gratuitamente
+                      Experimentar WebFit Pro
                     </button>
                   </div>
                 ) : (
                   <div>
-                    <h3 style={{ marginBottom: '12px' }}>iMetas do Paciente (Membro Black)</h3>
+                    <h3 style={{ marginBottom: '12px' }}>Metas do paciente (Plano Pro)</h3>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '13px', marginBottom: '20px' }}>
                       Defina metas de hábitos e acompanhe a evolução do paciente nas consultas.
                     </p>

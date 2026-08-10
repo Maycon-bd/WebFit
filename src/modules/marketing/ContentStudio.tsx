@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 
 type CanvasTemplate = 'dica' | 'receita' | 'agendamento';
 
-const WebDietCanvas: React.FC = () => {
+const ContentStudio: React.FC = () => {
   const [template, setTemplate] = useState<CanvasTemplate>('dica');
   const [title, setTitle] = useState('Dica de Nutrição Saudável');
   const [subtitle, setSubtitle] = useState('Beba água logo ao acordar para ativar seu metabolismo!');
-  const [bgColor, setBgColor] = useState('#0da19c');
+  const [bgColor, setBgColor] = useState('#595dcf');
   const [textColor, setTextColor] = useState('#ffffff');
 
   const handleExport = () => {
@@ -15,7 +15,7 @@ const WebDietCanvas: React.FC = () => {
 
   return (
     <div>
-      <h2 style={{ fontSize: '16px', marginBottom: '14px' }}>WebDiet Canvas - Criador de Conteúdo Visual</h2>
+      <h2 style={{ fontSize: '16px', marginBottom: '14px' }}>Estúdio WebFit — Conteúdo para sua marca</h2>
       
       <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '24px' }}>
         {/* Editor Controls */}
@@ -31,7 +31,7 @@ const WebDietCanvas: React.FC = () => {
                 if (val === 'dica') {
                   setTitle('Dica de Nutrição Saudável');
                   setSubtitle('Beba água logo ao acordar para ativar seu metabolismo!');
-                  setBgColor('#0da19c');
+                  setBgColor('#595dcf');
                 } else if (val === 'receita') {
                   setTitle('Receita Prática Fit');
                   setSubtitle('Panqueca de aveia com mel e morangos frescos.');
@@ -119,11 +119,11 @@ const WebDietCanvas: React.FC = () => {
             {/* Watermark Logo */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.85 }}>
               <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'conic-gradient(#10b981, #f59e0b, #ef4444)' }}></div>
-              <span style={{ fontSize: '10px', fontWeight: 'bold', fontFamily: 'Outfit' }}>WebFit Arts</span>
+              <span style={{ fontSize: '10px', fontWeight: 'bold', fontFamily: 'Manrope' }}>WebFit Studio</span>
             </div>
 
             <div style={{ margin: 'auto 0' }}>
-              <h3 style={{ fontSize: '20px', fontFamily: 'Outfit', fontWeight: '800', marginBottom: '10px', lineHeight: '1.2' }}>{title}</h3>
+              <h3 style={{ fontSize: '20px', fontFamily: 'Manrope', fontWeight: '800', marginBottom: '10px', lineHeight: '1.2' }}>{title}</h3>
               <p style={{ fontSize: '12px', opacity: 0.9, lineHeight: '1.4' }}>{subtitle}</p>
             </div>
 
@@ -137,4 +137,4 @@ const WebDietCanvas: React.FC = () => {
   );
 };
 
-export default WebDietCanvas;
+export default ContentStudio;

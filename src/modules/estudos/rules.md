@@ -25,6 +25,6 @@ Este documento estabelece as regras de negócio para as ferramentas educacionais
 
 ---
 
-## 4. WebDiet Cast & Blog
+## 4. WebFit Cast & Biblioteca
 - **Podcast**: Módulo de player simulado para reproduzir debates de convidados em formato de áudio (tocar, avançar e retroceder tempo).
 - **Blog**: Canal editorial que divulga novidades sobre atualização técnica e melhorias na plataforma WebFit.

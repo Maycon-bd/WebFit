@@ -4,10 +4,10 @@ Este documento descreve as regras de negócio associadas aos elementos exibidos 
 
 ---
 
-## 1. Banner Superior (WebDiet Black)
-- **Regra de Upsell**: Um banner dourado em destaque convida o profissional a assinar o plano premium **WebDiet Black**.
+## 1. Identidade e plano WebFit Pro
+- **Regra de Upsell**: A área de assinatura apresenta os recursos do plano **WebFit Pro** sem interferir no fluxo clínico principal.
 - **Ação**: Clicar no banner alterna o status da assinatura (`isBlack`) no perfil do usuário.
-- **Mudança de Estado**: Quando o usuário se torna "Black", o banner altera sua mensagem de convite para uma mensagem de boas-vindas, e desbloqueia recursos anteriormente restritos nos módulos Estudos, Ferramentas e Marketing.
+- **Mudança de Estado**: Quando o plano Pro é ativado, recursos avançados são liberados nos módulos Estudos, Ferramentas e Marketing.
 
 ---
 

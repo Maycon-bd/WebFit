@@ -17,6 +17,7 @@ import type {
   SiteSettings,
   Chat,
 } from '../types';
+import { readStorage, readStringStorage, writeStorage } from '../services/storage';
 
 export const AppContext = createContext<AppContextType>({} as AppContextType);
 
@@ -25,8 +26,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [activePage, setActivePage] = useState<AppPage>('dashboard');
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
   const [appTheme, setAppTheme] = useState<AppTheme>(() => {
-    const saved = localStorage.getItem('webfit_theme') as AppTheme | null;
-    return saved || 'midnight';
+    return readStringStorage<AppTheme>('webfit_theme', 'light');
   });
 
   // Action Triggers from Apps Grid dropdown
@@ -36,8 +36,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 1. User Profile State
   const [userProfile, setUserProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem('webfit_profile');
-    return saved ? JSON.parse(saved) : {
+    const saved = readStorage<UserProfile | null>('webfit_profile', null);
+    return saved ?? {
       name: 'Dra. Marina Silva',
       crn: 'CRN-3 12345/SP',
       email: 'marina.nutri@webfit.com',
@@ -49,8 +49,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 2. Patients State
   const [patients, setPatients] = useState<Patient[]>(() => {
-    const saved = localStorage.getItem('webfit_patients');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorage<Patient[] | null>('webfit_patients', null);
+    if (saved) return saved;
     return [
       {
         id: '1',
@@ -141,8 +141,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 3. Planner / Tasks State
   const [plannerTasks, setPlannerTasks] = useState<PlannerTask[]>(() => {
-    const saved = localStorage.getItem('webfit_tasks');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorage<PlannerTask[] | null>('webfit_tasks', null);
+    if (saved) return saved;
     return [
       { id: 't1', date: '2026-06-19', text: 'Enviar relatório pós-consulta da Alaine', done: false },
       { id: 't2', date: '2026-06-19', text: 'Revisar cardápio da Raiza', done: false },
@@ -152,8 +152,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 4. Notifications State
   const [notifications, setNotifications] = useState<Notification[]>(() => {
-    const saved = localStorage.getItem('webfit_notifications');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorage<Notification[] | null>('webfit_notifications', null);
+    if (saved) return saved;
     return [
       {
         id: 'n1',
@@ -200,8 +200,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 5. Prescriptions State
   const [prescriptions, setPrescriptions] = useState<Prescription[]>(() => {
-    const saved = localStorage.getItem('webfit_prescriptions');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorage<Prescription[] | null>('webfit_prescriptions', null);
+    if (saved) return saved;
     return [
       { id: 'pr1', type: 'Cardápio Semanal', date: '19/06/2026', patientName: 'Alaine Dos Santos Pereira', patientId: '1' },
       { id: 'pr2', type: 'Cardápio Semanal', date: '19/06/2026', patientName: 'Gabriely Martins De Souza', patientId: '3' },
@@ -213,8 +213,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 6. Appointments State
   const [appointments, setAppointments] = useState<Appointment[]>(() => {
-    const saved = localStorage.getItem('webfit_appointments');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorage<Appointment[] | null>('webfit_appointments', null);
+    if (saved) return saved;
     return [
       { id: 'ap1', patientId: '1', patientName: 'Alaine Dos Santos Pereira', date: '2025-07-05', time: '10:00', type: 'Presencial', status: 'Realizada' },
       { id: 'ap2', patientId: '2', patientName: 'Raiza Manuelle Marmo Santos', date: '2025-07-12', time: '14:00', type: 'Presencial', status: 'Realizada' },
@@ -233,8 +233,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 7. Financial Transactions
   const [financials, setFinancials] = useState<Financial[]>(() => {
-    const saved = localStorage.getItem('webfit_financials');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorage<Financial[] | null>('webfit_financials', null);
+    if (saved) return saved;
     return [
       { id: 'f1', patientName: 'Alaine Dos Santos Pereira', date: '19/06/2026', value: 250.00, method: 'PIX', status: 'Pago' },
       { id: 'f2', patientName: 'Raiza Manuelle Marmo Santos', date: '19/06/2026', value: 300.00, method: 'Cartão', status: 'Pago' },
@@ -247,8 +247,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 8. Chat histories
   const [chats, setChats] = useState<Chat>(() => {
-    const saved = localStorage.getItem('webfit_chats');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorage<Chat | null>('webfit_chats', null);
+    if (saved) return saved;
     return {
       '1': [
         { sender: 'patient', text: 'Olá Dra! Já baixei o app.', time: '19/06/2026 - 11:15' },
@@ -263,8 +263,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 9. Recipes
   const [recipes, setRecipes] = useState<Recipe[]>(() => {
-    const saved = localStorage.getItem('webfit_recipes');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorage<Recipe[] | null>('webfit_recipes', null);
+    if (saved) return saved;
     return [
       { id: 'r1', title: 'Panqueca Fit de Banana', ingredients: '1 banana madura, 1 ovo, 2 colheres de sopa de farelo de aveia, canela a gosto.', method: 'Amasse a banana, misture com o ovo e farelo de aveia. Asse em frigideira antiaderente dos dois lados.', calories: 220 },
       { id: 'r2', title: 'Pão de Queijo de Frigideira', ingredients: '1 ovo, 1 colher de sopa de tapioca, 1 colher de sopa de requeijão light, 1 colher de sopa de queijo ralado.', method: 'Misture bem todos os ingredientes e asse na frigideira untada. Tampe para derreter.', calories: 180 },
@@ -274,8 +274,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 10. My Custom Foods
   const [myFoods, setMyFoods] = useState<Food[]>(() => {
-    const saved = localStorage.getItem('webfit_myfoods');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorage<Food[] | null>('webfit_myfoods', null);
+    if (saved) return saved;
     return [
       { id: 'fd1', name: 'Iogurte Natural de Ovelha', portion: '100g', calories: 75, protein: 5.5, carbs: 4.0, fat: 3.8 },
       { id: 'fd2', name: 'Pão de Fermentação Natural (Levain)', portion: '50g (1 fatia)', calories: 130, protein: 4.2, carbs: 26.0, fat: 0.8 },
@@ -285,8 +285,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 11. Message Templates
   const [messageTemplates, setMessageTemplates] = useState<MessageTemplate[]>(() => {
-    const saved = localStorage.getItem('webfit_templates');
-    if (saved) return JSON.parse(saved);
+    const saved = readStorage<MessageTemplate[] | null>('webfit_templates', null);
+    if (saved) return saved;
     return [
       { id: 'mt1', title: 'Boas-vindas ao consultório', content: 'Olá {nome}, fico muito feliz em acompanhar você na sua jornada!' },
       { id: 'mt2', title: 'Lembrete de retorno', content: 'Olá {nome}, espero que esteja indo tudo bem com o plano alimentar!' },
@@ -296,8 +296,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 12. App Settings Widget Content
   const [appSettings, setAppSettings] = useState<AppSettings>(() => {
-    const saved = localStorage.getItem('webfit_app_settings');
-    return saved ? JSON.parse(saved) : {
+    const saved = readStorage<AppSettings | null>('webfit_app_settings', null);
+    return saved ?? {
       allowDiarioPhotos: true,
       allowWaterTracking: true,
       allowWeightLogging: true,
@@ -307,8 +307,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   // 13. Site Creator Content (Marketing)
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(() => {
-    const saved = localStorage.getItem('webfit_site_settings');
-    return saved ? JSON.parse(saved) : {
+    const saved = readStorage<SiteSettings | null>('webfit_site_settings', null);
+    return saved ?? {
       title: 'Marina Silva Nutrição Personalizada',
       bio: 'Nutricionista clínica com foco em emagrecimento saudável, gestantes e nutrição esportiva.',
       address: 'Av. Paulista, 1000 - São Paulo, SP',
@@ -318,20 +318,20 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   // ── Persist to localStorage ──────────────────────────────────
-  useEffect(() => { localStorage.setItem('webfit_theme', appTheme); }, [appTheme]);
-  useEffect(() => { localStorage.setItem('webfit_profile', JSON.stringify(userProfile)); }, [userProfile]);
-  useEffect(() => { localStorage.setItem('webfit_patients', JSON.stringify(patients)); }, [patients]);
-  useEffect(() => { localStorage.setItem('webfit_tasks', JSON.stringify(plannerTasks)); }, [plannerTasks]);
-  useEffect(() => { localStorage.setItem('webfit_notifications', JSON.stringify(notifications)); }, [notifications]);
-  useEffect(() => { localStorage.setItem('webfit_prescriptions', JSON.stringify(prescriptions)); }, [prescriptions]);
-  useEffect(() => { localStorage.setItem('webfit_appointments', JSON.stringify(appointments)); }, [appointments]);
-  useEffect(() => { localStorage.setItem('webfit_financials', JSON.stringify(financials)); }, [financials]);
-  useEffect(() => { localStorage.setItem('webfit_chats', JSON.stringify(chats)); }, [chats]);
-  useEffect(() => { localStorage.setItem('webfit_recipes', JSON.stringify(recipes)); }, [recipes]);
-  useEffect(() => { localStorage.setItem('webfit_myfoods', JSON.stringify(myFoods)); }, [myFoods]);
-  useEffect(() => { localStorage.setItem('webfit_templates', JSON.stringify(messageTemplates)); }, [messageTemplates]);
-  useEffect(() => { localStorage.setItem('webfit_app_settings', JSON.stringify(appSettings)); }, [appSettings]);
-  useEffect(() => { localStorage.setItem('webfit_site_settings', JSON.stringify(siteSettings)); }, [siteSettings]);
+  useEffect(() => { writeStorage('webfit_theme', appTheme); }, [appTheme]);
+  useEffect(() => { writeStorage('webfit_profile', userProfile); }, [userProfile]);
+  useEffect(() => { writeStorage('webfit_patients', patients); }, [patients]);
+  useEffect(() => { writeStorage('webfit_tasks', plannerTasks); }, [plannerTasks]);
+  useEffect(() => { writeStorage('webfit_notifications', notifications); }, [notifications]);
+  useEffect(() => { writeStorage('webfit_prescriptions', prescriptions); }, [prescriptions]);
+  useEffect(() => { writeStorage('webfit_appointments', appointments); }, [appointments]);
+  useEffect(() => { writeStorage('webfit_financials', financials); }, [financials]);
+  useEffect(() => { writeStorage('webfit_chats', chats); }, [chats]);
+  useEffect(() => { writeStorage('webfit_recipes', recipes); }, [recipes]);
+  useEffect(() => { writeStorage('webfit_myfoods', myFoods); }, [myFoods]);
+  useEffect(() => { writeStorage('webfit_templates', messageTemplates); }, [messageTemplates]);
+  useEffect(() => { writeStorage('webfit_app_settings', appSettings); }, [appSettings]);
+  useEffect(() => { writeStorage('webfit_site_settings', siteSettings); }, [siteSettings]);
 
   // ── Actions ──────────────────────────────────────────────────
 
@@ -375,6 +375,16 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   const deletePatient = (id: string) => {
     setPatients(prev => prev.filter(p => p.id !== id));
+    setAppointments(prev => prev.filter(ap => ap.patientId !== id));
+    setPrescriptions(prev => prev.filter(prescription => prescription.patientId !== id));
+    setNotifications(prev => prev.filter(notification => notification.patientId !== id));
+    setFinancials(prev => prev.filter(transaction => transaction.patientId !== id));
+    setChats(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    setSelectedPatientId(prev => prev === id ? null : prev);
   };
 
   const addPlannerTask = (text: string, dateStr: string) => {
@@ -423,17 +433,18 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const cancelAppointment = (appointmentId: string) => {
-    setAppointments(prev => prev.filter(ap => ap.id !== appointmentId));
+    setAppointments(prev => prev.map(ap => ap.id === appointmentId ? { ...ap, status: 'Cancelada' } : ap));
   };
 
-  const addTransaction = (patientId: string, value: number, method: string) => {
+  const addTransaction = (patientId: string, value: number, method: string, customClientName = '') => {
     const patient = patients.find(p => p.id === patientId);
-    const name = patient ? patient.name : 'Cliente Avulso';
+    const name = patient ? patient.name : customClientName.trim() || 'Cliente Avulso';
     const now = new Date();
     const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
 
     const newTransaction: Financial = {
       id: Date.now().toString(),
+      patientId: patient?.id,
       patientName: name,
       date: formattedDate,
       value,
