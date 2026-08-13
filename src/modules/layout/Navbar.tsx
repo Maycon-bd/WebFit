@@ -97,6 +97,13 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
   ];
 
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
+  const avatarInitials = userProfile.name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('') || 'P';
 
   return (
     <header className="navbar">
@@ -287,7 +294,11 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
           onClick={onOpenProfile}
           title="Ver Perfil Profissional"
         >
-          <img src={userProfile.avatar} alt="Avatar do Nutricionista" />
+          {userProfile.avatar ? (
+            <img src={userProfile.avatar} alt="Avatar do Nutricionista" />
+          ) : (
+            <span className="user-avatar-fallback" aria-hidden="true">{avatarInitials}</span>
+          )}
         </button>
         {configured && session && (
           <button className="icon-btn" onClick={() => void signOut()} title="Sair da conta" aria-label="Sair da conta">

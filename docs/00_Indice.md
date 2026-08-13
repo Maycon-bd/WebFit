@@ -1,4 +1,6 @@
-# Documentação do Sistema WebDiet
+# Documentação legada de referência — WebDiet
+
+> **Atenção:** este conjunto descreve a referência visual/funcional WebDiet e não representa sozinho o estado implementado do WebFit. Para arquitetura, segurança, maturidade real e roadmap, comece pelo [índice canônico do WebFit](README.md). Mantenha este material apenas como fonte de discovery até a validação dos stakeholders.
 
 > Documentação completa da plataforma **WebDiet**, voltada para nutricionistas e profissionais de saúde. Os arquivos abaixo estão organizados conforme a estrutura solicitada e podem ser lidos de forma independente ou em sequência.
 

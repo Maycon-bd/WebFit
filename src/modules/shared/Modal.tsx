@@ -12,11 +12,18 @@ const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+
+  // Keep the latest callback without making the focus-trap effect restart on
+  // every parent render (for example, while typing in a controlled input).
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== 'Tab' || !modalRef.current) return;
@@ -54,7 +61,7 @@ const Modal: React.FC<ModalProps> = ({ title, isOpen, onClose, children }) => {
       document.removeEventListener('keydown', handleKeyDown);
       previouslyFocused.current?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
