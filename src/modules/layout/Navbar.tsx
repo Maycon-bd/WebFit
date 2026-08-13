@@ -4,6 +4,7 @@ import DropdownMenu from './DropdownMenu';
 import NotificationPanel from './NotificationPanel';
 import type { AppPage } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import './styles.css';
 
 interface NavbarProps {
@@ -26,6 +27,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
     addPlannerTask,
   } = useContext(AppContext);
   const { configured, session, signOut } = useAuth();
+  const { activeClinic } = useWorkspace();
 
   const [openDropdown, setOpenDropdown] = useState<DropdownName | null>(null);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -171,6 +173,11 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
       </div>
 
       <div className="nav-right">
+        {activeClinic && (
+          <span className="clinic-chip" title="Clínica ativa">
+            {activeClinic.name}
+          </span>
+        )}
         <span className={`connection-chip ${configured ? 'connected' : 'demo'}`} title={configured ? 'Dados conectados ao Supabase' : 'Configure o .env para conectar o Supabase'}>
           <i></i>{configured ? 'Nuvem' : 'Demo local'}
         </span>
@@ -295,10 +302,18 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
           title="Ver Perfil Profissional"
         >
           {userProfile.avatar ? (
-            <img src={userProfile.avatar} alt="Avatar do Nutricionista" />
+            <img
+              src={userProfile.avatar}
+              alt="Avatar do Nutricionista"
+              onError={(event) => {
+                event.currentTarget.style.display = 'none';
+                event.currentTarget.nextElementSibling?.removeAttribute('hidden');
+              }}
+            />
           ) : (
             <span className="user-avatar-fallback" aria-hidden="true">{avatarInitials}</span>
           )}
+          {userProfile.avatar && <span className="user-avatar-fallback" aria-hidden="true" hidden>{avatarInitials}</span>}
         </button>
         {configured && session && (
           <button className="icon-btn" onClick={() => void signOut()} title="Sair da conta" aria-label="Sair da conta">

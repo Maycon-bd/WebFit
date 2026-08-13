@@ -10,6 +10,14 @@ const auditMigration = readFileSync(
   resolve(process.cwd(), 'supabase/migrations/20260810134731_audit_soft_delete.sql'),
   'utf8',
 );
+const deleteLockdownMigration = readFileSync(
+  resolve(process.cwd(), 'supabase/migrations/20260810134921_complete_delete_lockdown.sql'),
+  'utf8',
+);
+const indexMigration = readFileSync(
+  resolve(process.cwd(), 'supabase/migrations/20260810135148_index_audit_foreign_keys.sql'),
+  'utf8',
+);
 
 describe('Supabase security baseline', () => {
   const exposedTables = [
@@ -45,5 +53,50 @@ describe('Supabase security baseline', () => {
     expect(auditMigration).toContain("audit_action := 'HARD_DELETE'");
     expect(auditMigration).toContain('revoke delete on public.clinic_members');
     expect(auditMigration).toContain('as restrictive for select to authenticated');
+  });
+
+  it('locks down hard deletes for every exposed business table', () => {
+    for (const table of exposedTables) {
+      expect(deleteLockdownMigration).toMatch(new RegExp(
+        `revoke\\s+delete\\s+on[\\s\\S]*?public\\.${table}(?:[\\s,]|$)`,
+        'i',
+      ));
+    }
+  });
+
+  it('hardens every security-definer function and revokes direct execution', () => {
+    const definerFunctions = [
+      'write_audit_log', 'cascade_patient_soft_delete',
+      'handle_new_user', 'add_clinic_owner_membership',
+    ];
+
+    for (const functionName of definerFunctions) {
+      expect(auditMigration).toMatch(new RegExp(
+        `function private\\.${functionName}\\(\\)[\\s\\S]*?security definer[\\s\\S]*?set search_path = ''`,
+        'i',
+      ));
+      expect(auditMigration).toContain(
+        `revoke execute on function private.${functionName}() from public, anon, authenticated;`,
+      );
+    }
+  });
+
+  it('does not authorize from user-editable metadata', () => {
+    expect(`${migration}\n${auditMigration}`).not.toMatch(/raw_user_meta_data[\s\S]{0,200}(role|permission)/i);
+    expect(`${migration}\n${auditMigration}`).not.toContain('auth.jwt() -> \'user_metadata\'');
+  });
+
+  it('indexes audit actor foreign keys used for traceability', () => {
+    const allMigrations = `${migration}\n${indexMigration}`;
+    const auditedTables = [
+      'anthropometry_entries', 'appointments', 'clinic_members', 'clinics',
+      'conversations', 'messages', 'notifications', 'patients', 'planner_tasks',
+      'prescriptions', 'profiles',
+    ];
+    for (const table of auditedTables) {
+      for (const field of ['created_by', 'updated_by', 'deleted_by']) {
+        expect(allMigrations).toContain(`on public.${table}(${field});`);
+      }
+    }
   });
 });

@@ -17,6 +17,7 @@ import StorageStatus from './components/StorageStatus';
 import AuthGate from './components/AuthGate';
 import { AuthProvider } from './context/AuthContext';
 import { WorkspaceProvider } from './context/WorkspaceContext';
+import ToastHost from './components/Toast';
 
 import './styles/global.css';
 
@@ -70,7 +71,7 @@ const InnerApp: React.FC = () => {
     borderRadius: '6px',
     border: appTheme === theme
       ? '2px solid var(--primary-teal)'
-      : '1px solid rgba(255,255,255,0.1)',
+      : '1px solid var(--input-border)',
     cursor: 'pointer',
     textAlign: 'left',
   });
@@ -78,6 +79,7 @@ const InnerApp: React.FC = () => {
   return (
     <div className={`app-container theme-${appTheme}`}>
       <StorageStatus />
+      <ToastHost />
       <Navbar onOpenProfile={handleOpenProfileModal} />
 
       <main>
@@ -139,25 +141,25 @@ const InnerApp: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setAppTheme('midnight')}
-                style={{ ...themeButtonStyle('midnight'), backgroundColor: 'var(--bg-dark)', color: 'var(--text-primary)' }}
+                style={{ ...themeButtonStyle('midnight'), backgroundColor: '#0b1020', color: '#f8faff' }}
               >
-                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#0b131e', border: '1px solid #ffffff' }}></span>
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#818cf8', border: '1px solid #c4cbe0' }}></span>
                 Meia-Noite
               </button>
               <button
                 type="button"
                 onClick={() => setAppTheme('oled')}
-                style={{ ...themeButtonStyle('oled'), backgroundColor: '#000000', color: '#ffffff' }}
+                style={{ ...themeButtonStyle('oled'), backgroundColor: '#000000', color: '#f3fdf8' }}
               >
-                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#000000', border: '1px solid #ffffff' }}></span>
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#10b981', border: '1px solid #5eead4' }}></span>
                 OLED
               </button>
               <button
                 type="button"
                 onClick={() => setAppTheme('slate')}
-                style={{ ...themeButtonStyle('slate'), backgroundColor: '#0f172a', color: '#f8fafc' }}
+                style={{ ...themeButtonStyle('slate'), backgroundColor: '#dce4ec', color: '#1f2d3d' }}
               >
-                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#0f172a', border: '1px solid #ffffff' }}></span>
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#0f766e', border: '1px solid #1f2d3d' }}></span>
                 Cinza Slate
               </button>
               <button
@@ -165,12 +167,11 @@ const InnerApp: React.FC = () => {
                 onClick={() => setAppTheme('light')}
                 style={{
                   ...themeButtonStyle('light'),
-                  border: appTheme === 'light' ? '2px solid var(--primary-teal)' : '1px solid rgba(0,0,0,0.15)',
-                  backgroundColor: '#ffffff',
-                  color: '#0f172a',
+                  backgroundColor: '#f4f7fb',
+                  color: '#14213d',
                 }}
               >
-                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#f8fafc', border: '1px solid #0f172a' }}></span>
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#2563eb', border: '1px solid #14213d' }}></span>
                 Claro Suave
               </button>
             </div>

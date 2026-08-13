@@ -34,6 +34,7 @@
 .icon-btn { border: 1px solid var(--line-subtle); border-radius: 11px; background: var(--bg-card); }
 .user-avatar-btn { border-color: var(--primary-teal-border); border-radius: 12px; box-shadow: none; }
 .connection-chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid var(--line-subtle); border-radius: 999px; background: var(--bg-card); color: var(--text-secondary); font-size: 10px; font-weight: 800; }
+.clinic-chip { display: inline-flex; align-items: center; max-width: 180px; padding: 7px 10px; border: 1px solid var(--primary-teal-border); border-radius: 999px; background: var(--primary-teal-light); color: var(--text-primary); font-size: 10px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .connection-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-warning); }
 .connection-chip.connected i { background: var(--color-success); box-shadow: 0 0 0 4px var(--color-success-bg); }
 .dropdown-menu, .notifications-panel, .apps-grid-dropdown { border-color: var(--line-subtle); border-radius: 16px; box-shadow: 0 20px 60px rgba(35,37,64,.16); }
@@ -264,6 +265,19 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.user-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary-teal), #2563eb);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 /* Notifications Panel Drawer */

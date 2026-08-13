@@ -179,6 +179,17 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const addPatient = async (patientData: Omit<Patient, 'id' | 'lastModified' | 'status'>): Promise<Patient> => {
+    if (!configured) {
+      const now = new Date();
+      const newPatient: Patient = {
+        ...patientData,
+        id: crypto.randomUUID(),
+        lastModified: new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'medium' }).format(now).replace(',', ' -'),
+        status: 'Ativo',
+      };
+      setPatients((current) => [newPatient, ...current]);
+      return newPatient;
+    }
     const { clinicId, userId } = requireClinicalIdentity();
     setDataError(null);
     const newPatient = await createPatient(clinicId, userId, patientData);

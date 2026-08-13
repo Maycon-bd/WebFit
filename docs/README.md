@@ -22,6 +22,7 @@ Esta pasta é a fonte canônica para entender o que o projeto pretende ser, o qu
 | [06 — Análise e recomendações](06-analise-recomendacoes.md) | Quais são os pontos fortes, fracos e melhorias recomendadas? |
 | [07 — Roadmap](07-roadmap.md) | O que fazer primeiro e quais critérios definem conclusão? |
 | [08 — Decisões e convenções](08-decisoes-convencoes.md) | Como manter consistência técnica e documental? |
+| [09 — Auditoria de qualidade](09-auditoria-qualidade.md) | Quais gates foram adicionados e quais riscos ainda permanecem? |
 
 ## Legenda de maturidade
 

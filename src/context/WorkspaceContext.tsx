@@ -10,6 +10,12 @@ interface WorkspaceContextValue {
   refresh: () => Promise<void>;
 }
 
+const demoClinic: ClinicWorkspace = {
+  id: 'demo-clinic',
+  name: 'Clínica de Demonstração',
+  slug: 'clinica-demonstracao',
+};
+
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
 
 export const WorkspaceProvider = ({ children }: React.PropsWithChildren) => {
@@ -19,7 +25,13 @@ export const WorkspaceProvider = ({ children }: React.PropsWithChildren) => {
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    if (!configured || !user) {
+    if (!configured) {
+      setActiveClinic(demoClinic);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+    if (!user) {
       setActiveClinic(null);
       setLoading(false);
       return;
@@ -47,6 +59,10 @@ export const WorkspaceProvider = ({ children }: React.PropsWithChildren) => {
     error,
     refresh,
     createClinic: async (name) => {
+      if (!configured) {
+        setActiveClinic({ ...demoClinic, name: name.trim() || demoClinic.name });
+        return null;
+      }
       if (!user) return 'Entre novamente para criar sua clínica.';
       try {
         const clinic = await createClinicWorkspace(name.trim(), user.id);
@@ -58,7 +74,7 @@ export const WorkspaceProvider = ({ children }: React.PropsWithChildren) => {
         return cause instanceof Error ? cause.message : 'Não foi possível criar a clínica.';
       }
     },
-  }), [activeClinic, error, loading, refresh, user]);
+  }), [activeClinic, configured, error, loading, refresh, user]);
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 };

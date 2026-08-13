@@ -32,6 +32,8 @@ npm run dev        # servidor local em http://localhost:3000
 npm run typecheck  # TypeScript
 npm run lint       # ESLint
 npm test           # Vitest
+npm run test:coverage # Vitest com limiares de cobertura
+npm run quality    # tipos + lint + cobertura + build
 npm run build      # bundle de produção
 npm run preview    # serve o bundle localmente
 ```
@@ -59,6 +61,7 @@ O schema está em `supabase/migrations/`. Não aplique migrações em produção
 - [Análise geral e recomendações](docs/06-analise-recomendacoes.md)
 - [Roadmap priorizado](docs/07-roadmap.md)
 - [Decisões, convenções e manutenção da documentação](docs/08-decisoes-convencoes.md)
+- [Auditoria de qualidade e riscos residuais](docs/09-auditoria-qualidade.md)
 
 ## Estrutura principal
 
@@ -80,7 +83,7 @@ docs/                  # documentação funcional e técnica
 
 ## Situação da qualidade
 
-Na análise de 12/08/2026, `typecheck`, `lint`, 24 testes e `build` passaram. Isso confirma a saúde básica do código, mas não substitui testes de integração com Supabase, testes E2E, acessibilidade, carga, recuperação de backup e segurança.
+Na auditoria de 13/08/2026, `typecheck`, `lint`, 64 testes com cobertura e `build` passaram. O escopo monitorado atinge mais de 97% de instruções, 98% de linhas, 91% de branches e 100% de funções. O workflow `Quality` repete o gate em pushes e pull requests. Isso confirma a saúde básica do código, mas não substitui testes de integração com Supabase, testes E2E, acessibilidade, carga, recuperação de backup e segurança.
 
 ## Avisos importantes
 
