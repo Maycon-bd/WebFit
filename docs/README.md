@@ -23,6 +23,10 @@ Esta pasta é a fonte canônica para entender o que o projeto pretende ser, o qu
 | [07 — Roadmap](07-roadmap.md) | O que fazer primeiro e quais critérios definem conclusão? |
 | [08 — Decisões e convenções](08-decisoes-convencoes.md) | Como manter consistência técnica e documental? |
 | [09 — Auditoria de qualidade](09-auditoria-qualidade.md) | Quais gates foram adicionados e quais riscos ainda permanecem? |
+| [10 — Migração para o WebFit Desktop](10-plano-migracao-webfit-desktop.md) | Como congelar a versão web e iniciar a aplicação local Tauri + SQLite? |
+| [11 — Curadoria e ciclo do WebFit Desktop](11-curadoria-documental-e-ciclo-desenvolvimento-desktop.md) | O que importar da documentação e como conduzir o novo produto pelo ciclo de engenharia de software? |
+| [Kit de handoff do WebFit Desktop](desktop-handoff/README.md) | Quais arquivos copiar e quais prompts executar no novo repositório? |
+| [Pasta pronta para copiar](../WEBFIT-DESKTOP-STARTER/README.md) | Pacote autocontido já organizado na estrutura do novo repositório. |
 
 ## Legenda de maturidade
 

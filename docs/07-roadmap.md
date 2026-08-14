@@ -1,5 +1,7 @@
 # Roadmap priorizado
 
+> **Status em 13/08/2026:** o desenvolvimento deste roadmap web está pausado. A direção aprovada é criar o **WebFit Desktop**, local e baseado em Tauri + SQLite. Este documento permanece como histórico e referência de produto; a execução ativa está descrita em [10 — Plano de migração para o WebFit Desktop](10-plano-migracao-webfit-desktop.md).
+
 Este roadmap é sequenciado por risco e dependência. Prazos devem ser estimados pela equipe depois de confirmar escopo e capacidade; as fases abaixo não são promessas de calendário.
 
 ## Visão de dependências
